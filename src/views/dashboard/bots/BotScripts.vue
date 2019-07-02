@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-toolbar dense>
-      <span v-if="selected.length">{{selected.length}} scripts selected</span>
+      <span v-if="selected.length">{{selected.length}} script{{selected.length > 1 ? 's' : ''}} selected</span>
       <v-spacer></v-spacer>
       <v-btn icon :disabled="!selected.length">
         <v-icon>refresh</v-icon>
@@ -25,34 +25,42 @@
         </td>
         <td>{{props.item.name}}</td>
         <td>{{props.item.started}}</td>
-        <td class="justify-end layout">
-          <v-menu>
-            <v-btn icon slot="activator">
-              <v-icon>more_vert</v-icon>
-            </v-btn>
-            <v-card>
-              <v-list>
-                <v-list-tile @click="">
-                  <v-list-tile-action>
-                    <v-icon>refresh</v-icon>
-                  </v-list-tile-action>
-                  <v-list-tile-title>Restart</v-list-tile-title>
-                </v-list-tile>
-                <v-list-tile @click="">
-                  <v-list-tile-action>
-                    <v-icon>stop</v-icon>
-                  </v-list-tile-action>
-                  <v-list-tile-title>Stop</v-list-tile-title>
-                </v-list-tile>
-                <v-list-tile @click="">
-                  <v-list-tile-action>
-                    <v-icon>info</v-icon>
-                  </v-list-tile-action>
-                  <v-list-tile-title>Details</v-list-tile-title>
-                </v-list-tile>
-              </v-list>
-            </v-card>
-          </v-menu>
+        <td class="pr-1">
+          <v-layout justify-end>
+            <v-tooltip top>
+              <v-btn icon slot="activator" @click="props.item.autostart = !props.item.autostart">
+                <v-icon>{{props.item.autostart ? 'star' : 'star_border'}}</v-icon>
+              </v-btn>
+              {{props.item.autostart ? 'Disable' : 'Enable'}} Autostart
+            </v-tooltip>
+            <v-menu>
+                <v-btn icon slot="activator">
+                  <v-icon>more_vert</v-icon>
+                </v-btn>
+                <v-card>
+                  <v-list>
+                    <v-list-tile @click="">
+                      <v-list-tile-action>
+                        <v-icon>refresh</v-icon>
+                      </v-list-tile-action>
+                      <v-list-tile-title>Restart</v-list-tile-title>
+                    </v-list-tile>
+                    <v-list-tile @click="">
+                      <v-list-tile-action>
+                        <v-icon>stop</v-icon>
+                      </v-list-tile-action>
+                      <v-list-tile-title>Stop</v-list-tile-title>
+                    </v-list-tile>
+                    <v-list-tile @click="">
+                      <v-list-tile-action>
+                        <v-icon>info</v-icon>
+                      </v-list-tile-action>
+                      <v-list-tile-title>Details</v-list-tile-title>
+                    </v-list-tile>
+                  </v-list>
+                </v-card>
+              </v-menu>
+          </v-layout>
         </td>
       </template>
     </v-data-table>
@@ -62,23 +70,45 @@
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
   import * as moment from 'moment';
+  import gql from 'graphql-tag';
 
-  @Component({})
-  export default class BotScripts extends Vue {
-    public scripts = [
-      {
-        name: 'Autopin',
-        started: moment(new Date()).fromNow()
-      },
-      {
-        name: 'FuckYourArmour',
-        started: moment(new Date()).fromNow()
-      },
-      {
-        name: 'Tags',
-        started: moment(new Date()).fromNow()
+  interface RunningScript {
+    script: {
+      id: string;
+      name: string;
+    };
+    autostart: boolean
+  }
+  interface QueryData {
+    bot: {
+      runningScripts: RunningScript[]
+    }
+  }
+
+  @Component({
+    apollo: {
+      bot() {
+        return {
+          query: gql`query GetScriptsForBot($id: String!) {
+  bot(id: $id) {
+    running_scripts {
+      script {
+        id
+        name
       }
-    ];
+      autostart
+    }
+  }
+}`,
+          variables: {
+            id: this.$route.params.id
+          }
+        }
+      }
+    }
+  })
+  export default class BotScripts extends Vue {
+    public bot!: QueryData;
     public readonly tableHeaders = [
       {
         text: 'Name',

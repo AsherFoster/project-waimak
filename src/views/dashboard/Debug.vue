@@ -13,14 +13,14 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import {User} from '@/rest/account';
+  import {DiscordUser} from '@/api/discord';
   import CopyText from '@/components/CopyText.vue';
 
   @Component({
     components: {CopyText}
   })
   export default class Debug extends Vue {
-    get user(): User {
+    get user(): DiscordUser {
       return this.$store.state.auth.user;
     }
     get token(): string {

@@ -1,12 +1,12 @@
 import {Module, GetterTree, ActionContext, ActionTree, MutationTree} from 'vuex';
 import router from '@/router';
 import {RootState} from './index';
-import {discordAuth, getUser, User} from '@/rest/account';
+import {discordAuth, getUser, DiscordUser} from '@/api/discord';
 
 export interface AuthenticationState {
   loggedIn: boolean;
   token: string | null;
-  user: User | null;
+  user: DiscordUser | null;
 }
 
 export type Context = ActionContext<AuthenticationState, RootState>;
@@ -24,7 +24,7 @@ const authentication: Module<AuthenticationState, RootState> = {
     user: null
   } as AuthenticationState,
   mutations: {
-    saveUser(state, user: User) {
+    saveUser(state, user: DiscordUser) {
       state.loggedIn = true;
       state.user = user;
     },

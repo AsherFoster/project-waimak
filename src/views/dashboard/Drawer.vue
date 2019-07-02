@@ -7,7 +7,7 @@
     <v-layout column fill-height>
       <v-flex>
         <v-toolbar flat class="transparent" v-if="!mini">
-          <v-toolbar-title>DSB Web</v-toolbar-title>
+          <v-toolbar-title>Project Waimak</v-toolbar-title>
         </v-toolbar>
         <v-list :class="mini || 'pt-0'">
           <v-tooltip v-for="link in links" :key="link.name" right :disabled="!mini">
@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts">
-  import {User} from '@/rest/account';
+  import {DiscordUser} from '@/api/discord';
   import { Component, Vue } from 'vue-property-decorator';
   import {namespace} from 'vuex-class';
 
@@ -92,7 +92,7 @@
   })
   export default class Drawer extends Vue {
     public mini: boolean = localStorage.getItem('mini-drawer') === '1';
-    @auth.State('user') public user!: User;
+    @auth.State('user') public user!: DiscordUser;
     @auth.Getter('avatarUrl') public avatarUrl!: string;
     @auth.Action('logout') public logout!: () => void;
     public links = [

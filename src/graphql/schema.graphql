@@ -1,0 +1,78 @@
+enum Platform {
+    NODEJS
+}
+enum BotState {
+    STARTUP
+    OK
+    ERROR
+}
+enum ScriptState {
+    RUNNING
+    LISTENING
+    ERRORED
+    STOPPED
+}
+scalar Date # ISO String
+
+interface BaseUser {
+    id: String!
+    name: String
+    avatar_url: String
+    discord_id: String
+}
+
+type User implements BaseUser {
+    id: String!
+    name: String
+    avatar_url: String
+    discord_id: String
+}
+type ClientUser implements BaseUser {
+    id: String!
+    name: String!
+    avatar_url: String!
+    email: String!
+    created: Date!
+    discord_id: String
+}
+type Bot {
+    id: String!
+    name: String!
+    platform: Platform!
+    resource_owner: User!
+    created: Date
+    created_by: User
+    connection: BotConnection
+    running_scripts: [RunningScript!]!
+    running_script(id: String!): RunningScript
+}
+type BotConnection {
+    state: BotState
+    created: Date
+}
+type Script {
+    id: String!
+    name: String!
+    body: String!
+    platform: Platform!
+    resource_owner: User!
+    created: Date!
+    created_by: User!
+    updated: Date
+    updated_by: User
+}
+type RunningScript {
+    script: Script!
+    started: Date!
+    state: ScriptState!
+    autostart: Boolean!
+}
+
+type Query {
+    bots: [Bot!]!
+    bot(id: String!): Bot
+
+    scripts: [Script!]!
+    script(id: String!): Script
+    user: ClientUser!
+}

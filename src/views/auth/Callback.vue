@@ -38,7 +38,7 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import {discordAuth} from '@/rest/account';
+  import {discordAuth} from '@/api/discord';
   import * as ClientOAuth2 from 'client-oauth2';
 
   @Component({})

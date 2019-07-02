@@ -1,9 +1,20 @@
-import {DISCORD_API_BASE} from '@/config';
-import store from '../store';
+import * as ClientOAuth2 from 'client-oauth2';
+import {Auth, DISCORD_API_BASE} from '@/config';
+import store from '@/store';
+import {DiscordUser} from '@/api/types/user';
+import {Headers, HttpMethod} from '@/api/types/http';
 
-export type HttpMethod = 'GET' | 'POST' | 'DELETE' | 'PUT' | 'PATCH' | 'UPDATE';
-export interface Headers {
-  [headerName: string]: string;
+export const discordAuth = new ClientOAuth2({
+  clientId: Auth.discordClientId,
+  authorizationUri: 'https://discordapp.com/api/oauth2/authorize',
+  redirectUri: window.location.origin + '/auth/discord/callback',
+  scopes: ['identify']
+});
+
+export async function getUser(id: string): Promise<DiscordUser> {
+  return discordRestRequest<DiscordUser>({
+    endpoint: '/users/' + id
+  });
 }
 
 export interface DiscordRestOptions {
@@ -32,3 +43,5 @@ export async function discordRestRequest<T>({
   if (!r.ok) throw new Error(`[Error ${body.code}] ${body.message}`);
   return body;
 }
+
+export {DiscordUser} from '@/api/types/user';
