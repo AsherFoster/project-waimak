@@ -56,7 +56,7 @@
   export default class Home extends Vue {
     public stats: string[][] = [];
     public sparkline = Array.from({length: 24}, this.sparklineValue);
-    @auth.Getter('avatarUrl') avatarUrl!: string;
+    @auth.Getter('avatarUrl') public avatarUrl!: string;
 
     public sparklineValue() {
       return Math.floor(Math.random() * 10);

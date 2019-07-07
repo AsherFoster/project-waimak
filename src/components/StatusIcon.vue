@@ -11,25 +11,27 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
 
-  type Dict = {[propName: string]: string};
+  interface Dict {
+    [propName: string]: string;
+  }
 
   // These are taken from the discord client, for familiarity
   const statusColors: Dict = {
-    ok: '#43b581',
-    startup: '#faa61a',
-    error: '#f04747',
+    OK: '#43b581',
+    STARTUP: '#faa61a',
+    ERROR: '#f04747',
   };
 
   @Component({})
   export default class StatusIcon extends Vue {
-    @Prop({required: true}) mode!: string;
-    @Prop({default: true}) online!: boolean;
+    @Prop({required: true}) public mode!: string;
+    @Prop({default: true}) public online!: boolean;
 
     get color() {
       return statusColors[this.mode];
     }
     get text() {
-      return (this.online ? 'Online' : 'Offline') + ' (' + this.mode + ')'
+      return (this.online ? 'Online' : 'Offline') + ' (' + this.mode + ')';
     }
   }
 </script>

@@ -1,12 +1,12 @@
 <template>
-  <v-card>
+  <v-card v-if="bot">
     <v-layout align-center pa-3>
       <v-avatar size="100">
         <img :src="bot.avatarUrl">
       </v-avatar>
       <h2 class="ml-3">
         <span class="display-1">{{bot.name}}</span>
-        <span class="caption ma-0">#1337</span>
+<!--        <span class="caption ma-0">#1337</span>-->
       </h2>
       <v-spacer></v-spacer>
       <div>
@@ -16,23 +16,44 @@
       </div>
     </v-layout>
     <v-card-text>
-      <p>Platform: Node.js</p>
+      <p>Platform: {{bot.platform}}</p>
+      <p>Created: {{bot.created | momentnow}}</p>
     </v-card-text>
   </v-card>
 </template>
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
+  import gql from 'graphql-tag';
 
-  @Component({})
+  interface BotQueryResult {
+    name: string;
+    avatarUrl?: string;
+    platform: string;
+    created: Date;
+  }
+
+  @Component({
+    apollo: {
+      bot() {
+        return {
+          query: gql`query GetBotForOverview($id: String!) {
+  bot(id: $id) {
+    name
+    avatarUrl
+    platform
+    created
+  }
+}`,
+          variables: {
+            id: this.$route.params.id
+          }
+        };
+      }
+    }
+  })
   export default class BotDetails extends Vue {
-    public bot = {
-      id: '269783357297131521',
-      name: 'Pointless Bot',
-      platform: 'nodejs',
-      scriptsRunning: 5,
-      avatarUrl: '//cdn.discordapp.com/avatars/269783357297131521/80c311e9817186aa764c53bd0800edba.png?size=256'
-    };
+    public bot: BotQueryResult | null = null;
   }
 </script>
 

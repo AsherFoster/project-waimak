@@ -65,6 +65,7 @@
         await store.dispatch('auth/initialiseUser');
         this.ready = true;
       } catch (e) {
+        // tslint:disable-next-line:no-console
         console.error('Initialization failed:', e);
         this.$router.push('/login');
       }

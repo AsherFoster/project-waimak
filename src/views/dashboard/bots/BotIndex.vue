@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-layout wrap>
-      <v-flex md4 v-for="bot in bots" pa-3>
+      <v-flex md4 v-for="bot in bots" :key="bot.id" pa-3>
         <v-card class="bot-card">
           <router-link :to="'/dashboard/bots/' + bot.id">
             <v-card-title>
@@ -14,13 +14,16 @@
           <v-card-text>
             <v-layout>
               <v-flex xs4>
-                <p class="headline mb-0">8</p>
+                <p class="headline mb-0">{{bot.runningScriptCount}}</p>
                 <p>running scripts</p>
               </v-flex>
               <v-divider class="mx-3" vertical />
-              <v-flex xs4>
-                <p class="headline mb-0">5 hours</p>
+              <v-flex xs4 v-if="bot.connection">
+                <p class="headline mb-0">{{bot.connection.created | momentnow(true)}}</p>
                 <p>uptime</p>
+              </v-flex>
+              <v-flex xs4 v-else>
+                <p class="headline mb-0">Offline</p>
               </v-flex>
             </v-layout>
           </v-card-text>
@@ -40,7 +43,7 @@
       </v-flex>
       <v-flex md4 pa-3>
         <v-layout align-center justify-center column class="bot-card">
-          <v-btn icon fab to="/bots/create" color="accent">
+          <v-btn icon fab to="/dashboard/bots/create" color="accent">
             <v-icon>add</v-icon>
           </v-btn>
         </v-layout>
@@ -52,34 +55,36 @@
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
   import {Getter} from 'vuex-class';
+  import gql from 'graphql-tag';
 
   interface Bot {
     id: string;
     name: string;
-    platform: string;
-    scriptsRunning: number;
-    avatarUrl: string;
+    avatarUrl: string | null;
+    runningScriptCount: number;
+    connection: {
+      created: Date
+    } | null;
   }
 
-  @Component({})
+  @Component({
+    apollo: {
+      bots: gql`query ListAllBots {
+  bots {
+    id
+    name
+    avatarUrl
+    runningScriptCount
+    connection {
+      created
+    }
+  }
+}`
+    }
+  })
   export default class BotIndex extends Vue {
     @Getter('avatarUrl', {namespace: 'auth'}) public avatarUrl!: string;
-    public bots: Bot[] = [
-      {
-        id: '269783357297131521',
-        name: 'Pointless Bot',
-        platform: 'nodejs',
-        scriptsRunning: 5,
-        avatarUrl: '//cdn.discordapp.com/avatars/269783357297131521/80c311e9817186aa764c53bd0800edba.png?size=256'
-      },
-      {
-        id: '328441126023331850',
-        name: 'Pointless Bot Dev!',
-        platform: 'nodejs',
-        scriptsRunning: 3,
-        avatarUrl: '//cdn.discordapp.com/avatars/328441126023331850/e49ac366ce50d67a396d1d6bd186c5b9.png?size=256'
-      }
-    ];
+    public bots: Bot[] = [];
   }
 </script>
 

@@ -12,7 +12,7 @@
     </v-toolbar>
     <v-data-table
             :headers="tableHeaders"
-            :items="scripts"
+            :items="bot.runningScripts"
             select-all
             v-model="selected"
             hide-actions
@@ -23,8 +23,8 @@
         <td style="width: 0">
           <v-checkbox v-model="props.selected" primary hide-details></v-checkbox>
         </td>
-        <td>{{props.item.name}}</td>
-        <td>{{props.item.started}}</td>
+        <td>{{props.item.script.name}}</td>
+        <td>{{props.item.started | momentnow}}</td>
         <td class="pr-1">
           <v-layout justify-end>
             <v-tooltip top>
@@ -69,7 +69,6 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import * as moment from 'moment';
   import gql from 'graphql-tag';
 
   interface RunningScript {
@@ -77,12 +76,10 @@
       id: string;
       name: string;
     };
-    autostart: boolean
+    autostart: boolean;
   }
-  interface QueryData {
-    bot: {
-      runningScripts: RunningScript[]
-    }
+  interface BotQuery {
+    runningScripts: RunningScript[];
   }
 
   @Component({
@@ -91,11 +88,12 @@
         return {
           query: gql`query GetScriptsForBot($id: String!) {
   bot(id: $id) {
-    running_scripts {
+    runningScripts {
       script {
         id
         name
       }
+      started
       autostart
     }
   }
@@ -103,12 +101,14 @@
           variables: {
             id: this.$route.params.id
           }
-        }
+        };
       }
     }
   })
   export default class BotScripts extends Vue {
-    public bot!: QueryData;
+    public bot: BotQuery = {
+      runningScripts: []
+    };
     public readonly tableHeaders = [
       {
         text: 'Name',

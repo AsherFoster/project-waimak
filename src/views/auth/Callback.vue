@@ -58,7 +58,6 @@
       discordAuth.token.getToken('#' + hash.substr(2), {state}).then((token) => {
         this.token = token;
       }).catch((e) => {
-        console.error(e);
         this.error = {
           title: 'Authentication Failed',
           message: 'Failed to parse the authentication response. Please try again',

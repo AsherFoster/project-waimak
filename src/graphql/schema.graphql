@@ -14,38 +14,37 @@ enum ScriptState {
 }
 scalar Date # ISO String
 
-interface BaseUser {
+type User {
     id: String!
     name: String
-    avatar_url: String
-    discord_id: String
+    avatarUrl: String
+    discordId: String
 }
-
-type User implements BaseUser {
-    id: String!
-    name: String
-    avatar_url: String
-    discord_id: String
-}
-type ClientUser implements BaseUser {
+type ClientUser {
     id: String!
     name: String!
-    avatar_url: String!
+    avatarUrl: String!
     email: String!
     created: Date!
-    discord_id: String
+    discordId: String
 }
 type Bot {
     id: String!
     name: String!
     platform: Platform!
     resource_owner: User!
+    avatarUrl: String
     created: Date
     created_by: User
     connection: BotConnection
-    running_scripts: [RunningScript!]!
-    running_script(id: String!): RunningScript
+    runningScripts(first: Int = 10, after: String): RunningScripts!
+    runningScript(id: String!): RunningScript
 }
+type Bots {
+    totalCount: Int!
+    nodes: [Bot!]!
+}
+
 type BotConnection {
     state: BotState
     created: Date
@@ -57,22 +56,32 @@ type Script {
     platform: Platform!
     resource_owner: User!
     created: Date!
-    created_by: User!
+    createdBy: User!
     updated: Date
-    updated_by: User
+    updatedBy: User
 }
+type Scripts {
+    totalCount: Int!
+    nodes: [Script!]!
+}
+
 type RunningScript {
     script: Script!
     started: Date!
     state: ScriptState!
     autostart: Boolean!
 }
+type RunningScripts {
+    totalCount: Int!
+    nodes: [RunningScript!]!
+}
 
 type Query {
-    bots: [Bot!]!
+    bots(first: Int = 10, after: String): Bots!
     bot(id: String!): Bot
 
-    scripts: [Script!]!
+    scripts(first: Int = 10, after: String): Scripts!
     script(id: String!): Script
+
     user: ClientUser!
 }
