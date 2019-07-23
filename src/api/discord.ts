@@ -1,5 +1,5 @@
 import * as ClientOAuth2 from 'client-oauth2';
-import {authConfig, DISCORD_API_BASE} from '@/config';
+import {DISCORD_OAUTH_CLIENT_ID, DISCORD_API_BASE} from '@/config';
 import store from '@/store';
 
 export type HttpMethod = 'GET' | 'POST' | 'DELETE' | 'PUT' | 'PATCH' | 'UPDATE';
@@ -18,7 +18,7 @@ export interface DiscordUser {
 }
 
 export const discordAuth = new ClientOAuth2({
-  clientId: authConfig.discordClientId,
+  clientId: DISCORD_OAUTH_CLIENT_ID,
   authorizationUri: 'https://discordapp.com/api/oauth2/authorize',
   redirectUri: window.location.origin + '/auth/discord/callback',
   scopes: ['identify']

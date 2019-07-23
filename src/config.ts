@@ -1,5 +1,2 @@
 export const DISCORD_API_BASE = 'https://discordapp.com/api/v6';
-
-export const authConfig = {
-  discordClientId: process.env.DISCORD_OAUTH_CLIENT_ID
-};
+export const DISCORD_OAUTH_CLIENT_ID = process.env.VUE_APP_DISCORD_OAUTH_CLIENT_ID;

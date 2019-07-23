@@ -1,16 +1,3 @@
-export enum Platform {
-  NODEJS
-}
-
-export enum BotState {
-  STARTUP,
-  OK,
-  ERROR
-}
-
-export enum ScriptState {
-  RUNNING,
-  LISTENING,
-  ERRORED,
-  STOPPED
-}
+export type Platform = 'NODEJS';
+export type ConnectionState = 'STARTUP' | 'OK' | 'ERROR';
+export type ScriptState = 'RUNNING' | 'PASSIVE' | 'ERRORED' | 'STOPPED';

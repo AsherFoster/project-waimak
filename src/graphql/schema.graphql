@@ -8,7 +8,7 @@ enum BotState {
 }
 enum ScriptState {
     RUNNING
-    LISTENING
+    PASSIVE
     ERRORED
     STOPPED
 }
@@ -28,6 +28,7 @@ type ClientUser {
     created: Date!
     discordId: String
 }
+
 type Bot {
     id: String!
     name: String!
@@ -37,18 +38,47 @@ type Bot {
     created: Date
     created_by: User
     connection: BotConnection
-    runningScripts(first: Int = 10, after: String): RunningScripts!
-    runningScript(id: String!): RunningScript
+    scripts(first: Int = 10, after: String): ScriptLinks!
+    script(id: String!): ScriptLink
+    permissions: [BotPermission!]! # At the moment this doesn't seem worth paginating
+    token: String # Should this be viewable via the API?
 }
 type Bots {
     totalCount: Int!
     nodes: [Bot!]!
 }
-
 type BotConnection {
     state: BotState
     created: Date
 }
+input BotCreateInput {
+    name: String!
+    platform: String!
+    token: String
+    deviceCode: String!
+}
+input BotUpdateInput {
+    id: String!
+    name: String
+    platform: String
+}
+
+enum BotPermissionQualifierType {
+    USER
+    ROLE
+    CHANNEL
+    GUILD
+}
+type BotPermissionQualifier {
+    type: String!
+    value: String!
+}
+type BotPermission {
+    id: String!
+    name: String!
+    qualifiers: [BotPermissionQualifier!]!
+}
+
 type Script {
     id: String!
     name: String!
@@ -64,16 +94,28 @@ type Scripts {
     totalCount: Int!
     nodes: [Script!]!
 }
+input ScriptCreateInput {
+    name: String!
+    body: String
+    platform: Platform!
+}
+input ScriptUpdateInput {
+    id: String!
+    name: String
+    body: String
+    platform: Platform
+}
 
-type RunningScript {
+type ScriptLink {
     script: Script!
+    bot: Bot!
     started: Date!
     state: ScriptState!
     autostart: Boolean!
 }
-type RunningScripts {
+type ScriptLinks {
     totalCount: Int!
-    nodes: [RunningScript!]!
+    nodes: [ScriptLink!]!
 }
 
 type Query {
@@ -84,4 +126,20 @@ type Query {
     script(id: String!): Script
 
     user: ClientUser!
+}
+
+type Mutation {
+    # Script CRUD
+    createScript(script: ScriptCreateInput!): Script
+    updateScript(script: ScriptUpdateInput!): Script
+    deleteScript(script: String!): String!
+
+    # RunningScript CRUD
+    runScriptOnBot(script: String!, bot: String!): ScriptLink
+    stopScriptOnBot(script: String!, bot: String!): String!
+
+    # Bot CRUD
+    createBot(bot: BotCreateInput!): Bot
+    updateBot(bot: BotUpdateInput!): Bot
+    deleteBot(bot: String!): String!
 }

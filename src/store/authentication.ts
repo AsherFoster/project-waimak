@@ -50,8 +50,14 @@ const authentication: Module<AuthenticationState, RootState> = {
         throw new Error('No authorization token!');
       }
     },
+    async logout(context: Context): Promise<void> {
+      localStorage.removeItem('auth_access_token');
+      localStorage.removeItem('auth_expires');
+      window.location.href = '/login'; // Not router, to make it reload
+    },
     async oAuth2Callback(context: Context): Promise<void> {
       const token = await discordAuth.token.getToken(window.location.href);
+      // TODO state checking
       localStorage.setItem('auth_access_token', token.accessToken);
       localStorage.setItem('auth_expires', token.data.expires);
       router.push('/dashboard');
@@ -59,9 +65,7 @@ const authentication: Module<AuthenticationState, RootState> = {
     startOAuth2Flow(context: Context, provider: OAuth2Provider = 'discord'): void {
       const state = generateState();
       localStorage.setItem('oauth2state', state);
-      window.location.href = discordAuth.token.getUri({
-        state
-      });
+      window.location.href = discordAuth.token.getUri({state});
     }
   } as ActionTree<AuthenticationState, RootState>
 };

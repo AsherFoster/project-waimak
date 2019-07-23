@@ -55,8 +55,10 @@
   export default class DashboardWrapper extends Vue {
     public ready: boolean = false;
     public error: Error|null = null;
-    @State('loading') public loading!: boolean;
 
+    get loading(): boolean {
+      return this.$store.state.loading || this.$apollo.loading;
+    }
     get breadcrumbs(): any[] {
       return this.$route.path.split('/').slice(2).map((text) => ({text}));
     }

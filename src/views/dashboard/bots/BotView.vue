@@ -26,6 +26,11 @@
               Permissions
             </v-list-tile-title>
           </v-list-tile>
+          <v-list-tile to="options">
+            <v-list-tile-title>
+              Options
+            </v-list-tile-title>
+          </v-list-tile>
         </v-list>
       </v-navigation-drawer>
       <v-flex>
@@ -39,13 +44,13 @@
   import {Component, Vue} from 'vue-property-decorator';
   import StatusIcon from '@/components/StatusIcon.vue';
   import gql from 'graphql-tag';
-  import {BotState} from '@/graphql/schema-types';
+  import {ConnectionState} from '@/graphql/schema-types';
 
   interface BotQueryResult {
     name: string;
     platform: string;
     connection: {
-      state: BotState;
+      state: ConnectionState;
     };
   }
 

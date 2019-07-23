@@ -1,7 +1,7 @@
 <template>
-  <v-container>
-    <v-layout wrap>
-      <v-flex md4 v-for="bot in bots" :key="bot.id" pa-3>
+  <v-container class="fill-height">
+    <v-layout v-if="!$apollo.loading && bots.nodes.length" wrap>
+      <v-flex md4 v-for="bot in bots.nodes" :key="bot.id" pa-3>
         <v-card class="bot-card">
           <router-link :to="'/dashboard/bots/' + bot.id">
             <v-card-title>
@@ -14,7 +14,7 @@
           <v-card-text>
             <v-layout>
               <v-flex xs4>
-                <p class="headline mb-0">{{bot.runningScriptCount}}</p>
+                <p class="headline mb-0">{{bot.runningScripts.totalCount}}</p>
                 <p>running scripts</p>
               </v-flex>
               <v-divider class="mx-3" vertical />
@@ -43,11 +43,18 @@
       </v-flex>
       <v-flex md4 pa-3>
         <v-layout align-center justify-center column class="bot-card">
-          <v-btn icon fab to="/dashboard/bots/create" color="accent">
+          <v-btn icon fab to="/dashboard/bots/link" color="accent">
             <v-icon>add</v-icon>
           </v-btn>
         </v-layout>
       </v-flex>
+    </v-layout>
+    <v-layout v-else-if="!$apollo.loading" align-center fill-height justify-center column>
+      <h1>No bots found</h1>
+      <p>Let's change that!</p>
+      <v-btn to="/dashboard/bots/link" color="accent" large>
+        Link a bot
+      </v-btn>
     </v-layout>
   </v-container>
 </template>
@@ -61,22 +68,29 @@
     id: string;
     name: string;
     avatarUrl: string | null;
-    runningScriptCount: number;
+    runningScripts: {totalCount: number};
     connection: {
       created: Date
     } | null;
+  }
+  interface BotQuery {
+    nodes: Bot[];
   }
 
   @Component({
     apollo: {
       bots: gql`query ListAllBots {
   bots {
-    id
-    name
-    avatarUrl
-    runningScriptCount
-    connection {
-      created
+    nodes {
+      id
+      name
+      avatarUrl
+      runningScripts {
+        totalCount
+      }
+      connection {
+        created
+      }
     }
   }
 }`

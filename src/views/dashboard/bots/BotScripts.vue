@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="bot">
     <v-toolbar dense>
       <span v-if="selected.length">{{selected.length}} script{{selected.length > 1 ? 's' : ''}} selected</span>
       <v-spacer></v-spacer>
@@ -12,11 +12,11 @@
     </v-toolbar>
     <v-data-table
             :headers="tableHeaders"
-            :items="bot.runningScripts"
+            :items="bot.runningScripts.nodes"
             select-all
             v-model="selected"
             hide-actions
-            item-key="name"
+            item-key="script.id"
     >
       <template v-slot:items="props">
         <!-- Quick and dirty shrink. TODO tidy -->
@@ -76,10 +76,13 @@
       id: string;
       name: string;
     };
+    started: string;
     autostart: boolean;
   }
   interface BotQuery {
-    runningScripts: RunningScript[];
+    runningScripts: {
+      nodes: RunningScript[];
+    };
   }
 
   @Component({
@@ -89,12 +92,14 @@
           query: gql`query GetScriptsForBot($id: String!) {
   bot(id: $id) {
     runningScripts {
-      script {
-        id
-        name
-      }
-      started
-      autostart
+        nodes {
+          script {
+            id
+            name
+          }
+          started
+          autostart
+        }
     }
   }
 }`,
@@ -106,9 +111,7 @@
     }
   })
   export default class BotScripts extends Vue {
-    public bot: BotQuery = {
-      runningScripts: []
-    };
+    public bot: BotQuery | null = null;
     public readonly tableHeaders = [
       {
         text: 'Name',

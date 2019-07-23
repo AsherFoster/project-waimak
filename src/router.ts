@@ -24,17 +24,20 @@ const router = new Router({
         {path: 'debug', component: () => import('./views/dashboard/Debug.vue')},
         {path: 'about', component: () => import('./views/dashboard/About.vue')},
         {path: 'bots', component: () => import('./views/dashboard/bots/BotIndex.vue')},
+        {path: 'bots/link', component: () => import('./views/dashboard/bots/BotCreate.vue')},
         {
           path: 'bots/:id',
           component: () => import('./views/dashboard/bots/BotView.vue'),
           children: [
             {path: '', redirect: 'details'},
             {path: 'details', component: () => import('./views/dashboard/bots/BotDetails.vue')},
-            {path: 'scripts', component: () => import('./views/dashboard/bots/BotScripts.vue')}
+            {path: 'scripts', component: () => import('./views/dashboard/bots/BotScripts.vue')},
+            {path: 'permissions', component: () => import('./views/dashboard/bots/BotPermissions.vue')},
+            {path: 'options', component: () => import('./views/dashboard/bots/BotOptions.vue')}
           ]
         },
-        {path: 'scripts', component: () => import('./views/dashboard/scripts/Index.vue')},
-        {path: 'scripts/:id', component: () => import('./views/dashboard/scripts/Detail.vue')},
+        {path: 'scripts', component: () => import('./views/dashboard/scripts/ScriptIndex.vue')},
+        {path: 'scripts/:id', component: () => import('./views/dashboard/scripts/ScriptDetail.vue')},
         {path: '*', component: () => import('./views/Error404.vue')}
       ]
     },
