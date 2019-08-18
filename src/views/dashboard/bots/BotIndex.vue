@@ -1,49 +1,53 @@
 <template>
   <v-container class="fill-height">
     <v-layout v-if="!$apollo.loading && bots.nodes.length" wrap>
-      <v-flex md4 v-for="bot in bots.nodes" :key="bot.id" pa-3>
+      <v-flex xs12 sm6 md4 v-for="bot in bots.nodes" :key="bot.id" pa-3>
         <v-card class="bot-card">
-          <router-link :to="'/dashboard/bots/' + bot.id">
+          <router-link :to="'/dashboard/bots/' + bot.id" class="hidden-link">
             <v-card-title>
               <v-avatar>
                 <img :src="bot.avatarUrl">
               </v-avatar>
               <span class="title ml-2">{{bot.name}}</span>
+              <StatusIcon :connection="bot.connection"></StatusIcon>
             </v-card-title>
           </router-link>
           <v-card-text>
             <v-layout>
-              <v-flex xs4>
-                <p class="headline mb-0">{{bot.runningScripts.totalCount}}</p>
-                <p>running scripts</p>
+              <v-flex md6>
+                <router-link :to="`/dashboard/bots/${bot.id}/scripts`" class="hidden-link">
+                    <p class="headline mb-0">{{bot.scripts.totalCount}}</p>
+                    <p>linked scripts</p>
+                </router-link>
               </v-flex>
               <v-divider class="mx-3" vertical />
-              <v-flex xs4 v-if="bot.connection">
+              <v-flex md6 v-if="bot.connection">
                 <p class="headline mb-0">{{bot.connection.created | momentnow(true)}}</p>
                 <p>uptime</p>
               </v-flex>
-              <v-flex xs4 v-else>
+              <v-flex md6 v-else>
                 <p class="headline mb-0">Offline</p>
               </v-flex>
             </v-layout>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-tooltip bottom>
-              <v-btn color="error" icon flat slot="activator">
-                <v-icon>warning</v-icon>
-              </v-btn>
-              <span>Panic -- Stop all scripts</span>
-            </v-tooltip>
-            <v-btn icon>
-              <v-icon>more_vert</v-icon>
-            </v-btn>
+<!--            Is the panic button really useful? -->
+<!--            <v-tooltip bottom>-->
+<!--              <v-btn color="error" icon flat slot="activator" @click="botPanic(bot)">-->
+<!--                <v-icon>warning</v-icon>-->
+<!--              </v-btn>-->
+<!--              <span>Panic &#45;&#45; Stop all scripts</span>-->
+<!--            </v-tooltip>-->
+<!--            <v-btn icon>-->
+<!--              <v-icon>more_vert</v-icon>-->
+<!--            </v-btn>-->
           </v-card-actions>
         </v-card>
       </v-flex>
       <v-flex md4 pa-3>
         <v-layout align-center justify-center column class="bot-card">
-          <v-btn icon fab to="/dashboard/bots/link" color="accent">
+          <v-btn fab to="/dashboard/bots/link" color="accent">
             <v-icon>add</v-icon>
           </v-btn>
         </v-layout>
@@ -63,12 +67,13 @@
   import {Component, Vue} from 'vue-property-decorator';
   import {Getter} from 'vuex-class';
   import gql from 'graphql-tag';
+  import StatusIcon from '@/components/StatusIcon.vue';
 
   interface Bot {
     id: string;
     name: string;
     avatarUrl: string | null;
-    runningScripts: {totalCount: number};
+    scripts: {totalCount: number};
     connection: {
       created: Date
     } | null;
@@ -78,6 +83,7 @@
   }
 
   @Component({
+    components: {StatusIcon},
     apollo: {
       bots: gql`query ListAllBots {
   bots {
@@ -85,11 +91,12 @@
       id
       name
       avatarUrl
-      runningScripts {
+      scripts {
         totalCount
       }
       connection {
         created
+        state
       }
     }
   }
@@ -105,5 +112,9 @@
 <style scoped>
   .bot-card {
     min-height: 200px;
+  }
+  .hidden-link {
+    color: inherit;
+    text-decoration: none;
   }
 </style>

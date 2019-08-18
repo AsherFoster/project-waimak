@@ -1,9 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-
-// Dashboard
 import Dashboard from './views/dashboard/Dashboard.vue';
-import Home from './views/dashboard/Home.vue';
 
 Vue.use(Router);
 
@@ -14,13 +11,13 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      redirect: '/dashboard'
+      redirect: '/dashboard',
     },
     {
       path: '/dashboard',
       component: Dashboard,
       children: [
-        {path: '', component: Home},
+        {path: '', component: () => import('./views/dashboard/Home.vue')},
         {path: 'debug', component: () => import('./views/dashboard/Debug.vue')},
         {path: 'about', component: () => import('./views/dashboard/About.vue')},
         {path: 'bots', component: () => import('./views/dashboard/bots/BotIndex.vue')},
@@ -38,6 +35,8 @@ const router = new Router({
         },
         {path: 'scripts', component: () => import('./views/dashboard/scripts/ScriptIndex.vue')},
         {path: 'scripts/:id', component: () => import('./views/dashboard/scripts/ScriptDetail.vue')},
+        {path: 'settings', component: () => import('./views/dashboard/settings/SettingsView.vue')},
+        {path: 'settings/deleteaccount', component: () => import('./views/dashboard/settings/DeleteAccount.vue')},
         {path: '*', component: () => import('./views/Error404.vue')}
       ]
     },
@@ -46,8 +45,8 @@ const router = new Router({
       component: () => import('./views/auth/Login.vue')
     },
     {
-      path: '/auth/:provider/callback',
-      component: () => import('./views/auth/Callback.vue')
+      path: '/auth/complete',
+      component: () => import('./views/auth/Complete.vue')
     },
     {
       path: '*',

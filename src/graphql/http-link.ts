@@ -1,3 +1,4 @@
+import {ApolloLink, concat, NextLink, Operation, RequestHandler} from 'apollo-link';
 import {createHttpLink} from 'apollo-link-http';
 
 // HTTP connection to the API
@@ -6,4 +7,15 @@ const httpLink = createHttpLink({
   uri: 'http://localhost:4000/graphql',
 });
 
-export default httpLink;
+const authMiddleware = new ApolloLink(((operation: Operation, forward?: NextLink) => {
+  // add the authorization to the headers
+  operation.setContext({
+    headers: {
+      authorization: localStorage.getItem('auth_token') || null,
+    }
+  });
+
+  return forward && forward(operation);
+}) as RequestHandler);
+
+export default concat(authMiddleware, httpLink);

@@ -9,7 +9,7 @@ import httpLink from '@/graphql/http-link';
 const cache = new InMemoryCache();
 
 // Create the apollo client
-const apolloClient = new ApolloClient({
+export const apolloClient = new ApolloClient({
   link: httpLink,
   cache,
 });

@@ -1,18 +1,24 @@
 <template>
   <v-tooltip right>
-    <div slot="activator" class="ma-2">
-      <div v-if="online" class="icon" :style="'background: '+ color"></div>
-      <v-icon v-else size="medium" class="pulse" :color="mode !== 'ok' && color">offline_bolt</v-icon>
-    </div>
+    <template v-slot:activator="{ on }">
+      <div v-on="on" class="ma-2">
+        <div v-if="connection" class="icon" :style="'background: '+ color"></div>
+        <v-icon v-else size="medium" class="pulse" :color="color">offline_bolt</v-icon>
+      </div>
+    </template>
     <span>{{text}}</span>
   </v-tooltip>
 </template>
 
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
+  import {ConnectionState} from '@/graphql/schema-types';
 
   interface Dict {
     [propName: string]: string;
+  }
+  interface BotConnection {
+    state: ConnectionState;
   }
 
   // These are taken from the discord client, for familiarity
@@ -20,18 +26,22 @@
     OK: '#43b581',
     STARTUP: '#faa61a',
     ERROR: '#f04747',
+    DEFAULT: '#ffffff'
   };
 
   @Component({})
   export default class StatusIcon extends Vue {
-    @Prop({required: true}) public mode!: string;
-    @Prop({default: true}) public online!: boolean;
+    @Prop({required: true}) public connection!: BotConnection | null;
 
     get color() {
-      return statusColors[this.mode];
+      return statusColors[this.connection ? this.connection.state : 'DEFAULT'];
     }
     get text() {
-      return (this.online ? 'Online' : 'Offline') + ' (' + this.mode + ')';
+      return (this.connection ? 'Online' : 'Offline') +
+        (this.connection ? ' (' + this.cap(this.connection.state) + ')' : '');
+    }
+    private cap(str: string) {
+      return str[0].toUpperCase() + str.substr(1).toLowerCase();
     }
   }
 </script>

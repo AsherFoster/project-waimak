@@ -1,36 +1,50 @@
 <template>
   <div class="fill-height">
-    <v-layout fill-height v-if="bot">
+    <v-layout fill-height v-if="bot && bots">
       <v-navigation-drawer permanent class="fill-height">
-        <v-toolbar flat color="transparent">
-          <v-avatar>
-            <img src="//cdn.discordapp.com/avatars/269783357297131521/80c311e9817186aa764c53bd0800edba.png?size=256">
-          </v-avatar>
-          <v-toolbar-title>{{bot.name}}</v-toolbar-title>
-          <StatusIcon :mode="bot.connection.state" :online="!!bot.connection"></StatusIcon>
-        </v-toolbar>
-        <v-divider></v-divider>
-        <v-list>
-          <v-list-tile to="details">
-            <v-list-tile-title>
+        <v-select
+                :items="bots.nodes"
+                item-value="id"
+                filled
+                :value="bot.id"
+                @input="botSelectChange"
+                class="bot-select"
+                hide-details
+        >
+          <template v-slot:item="{ item }">
+            <v-avatar size="32" class="mr-2">
+              <img :src="item.avatarUrl">
+            </v-avatar>
+            <h2 class="title">{{item.name}}</h2>
+          </template>
+          <template v-slot:selection="{ item }">
+            <v-avatar size="32" class="mr-2">
+              <img :src="item.avatarUrl">
+            </v-avatar>
+            <h2 class="title title-cut-text">{{item.name}}</h2>
+          </template>
+        </v-select>
+        <v-list shaped>
+          <v-list-item to="details">
+            <v-list-item-title>
               Details
-            </v-list-tile-title>
-          </v-list-tile>
-          <v-list-tile to="scripts">
-            <v-list-tile-title>
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item to="scripts">
+            <v-list-item-title>
               Scripts
-            </v-list-tile-title>
-          </v-list-tile>
-          <v-list-tile to="permissions">
-            <v-list-tile-title>
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item to="permissions">
+            <v-list-item-title>
               Permissions
-            </v-list-tile-title>
-          </v-list-tile>
-          <v-list-tile to="options">
-            <v-list-tile-title>
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item to="options">
+            <v-list-item-title>
               Options
-            </v-list-tile-title>
-          </v-list-tile>
+            </v-list-item-title>
+          </v-list-item>
         </v-list>
       </v-navigation-drawer>
       <v-flex>
@@ -47,11 +61,20 @@
   import {ConnectionState} from '@/graphql/schema-types';
 
   interface BotQueryResult {
+    id: string;
     name: string;
-    platform: string;
+    avatarUrl: string;
     connection: {
       state: ConnectionState;
-    };
+    } | null;
+  }
+  interface BotsQuery {
+    nodes: BotOverview[];
+  }
+  interface BotOverview {
+    id: string;
+    name: string;
+    avatar: string;
   }
 
   @Component({
@@ -61,25 +84,49 @@
         return {
           query: gql`query GetBotForOverview($id: String!) {
   bot(id: $id) {
+    id
     name
-    platform
+    avatarUrl
     connection {
         state
     }
   }
 }`,
-          variables: {
-            id: this.$route.params.id
+          variables() {
+            return {id: this.$route.params.id};
           }
         };
-      }
+      },
+      bots: gql`query ListBotOverview {
+  bots {
+    nodes {
+      id
+      name
+      avatarUrl
+    }
+  }
+}`
     }
   })
   export default class BotView extends Vue {
     public bot: BotQueryResult | null = null;
+    public bots: BotsQuery | null = null;
+    public botSelectChange(v: string) {
+      this.$router.push({params: {id: v}});
+    }
   }
 </script>
 
 <style scoped>
-
+  .title-cut-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .bot-select >>> .v-select__selections {
+    /* Maybe hacky, but the -28px is to offset for the dropdown icon*/
+    max-width: calc(100% - 28px);
+    padding-top: 0 !important;
+    flex-wrap: nowrap;
+  }
 </style>

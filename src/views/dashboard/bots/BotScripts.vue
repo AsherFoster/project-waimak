@@ -1,69 +1,64 @@
 <template>
-  <div v-if="bot">
+  <div v-if="!$apollo.loading">
     <v-toolbar dense>
       <span v-if="selected.length">{{selected.length}} script{{selected.length > 1 ? 's' : ''}} selected</span>
       <v-spacer></v-spacer>
-      <v-btn icon :disabled="!selected.length">
+      <v-btn icon :disabled="!selected.length" @click="restartSelected">
         <v-icon>refresh</v-icon>
       </v-btn>
-      <v-btn icon :disabled="!selected.length">
+      <v-btn icon :disabled="!selected.length" @click="stopSelected">
         <v-icon>stop</v-icon>
       </v-btn>
     </v-toolbar>
     <v-data-table
+            v-if="bot.scripts.nodes.length"
             :headers="tableHeaders"
-            :items="bot.runningScripts.nodes"
-            select-all
+            :items="bot.scripts.nodes"
+            show-select
             v-model="selected"
-            hide-actions
+            hide-default-footer
             item-key="script.id"
     >
-      <template v-slot:items="props">
-        <!-- Quick and dirty shrink. TODO tidy -->
-        <td style="width: 0">
-          <v-checkbox v-model="props.selected" primary hide-details></v-checkbox>
-        </td>
-        <td>{{props.item.script.name}}</td>
-        <td>{{props.item.started | momentnow}}</td>
-        <td class="pr-1">
-          <v-layout justify-end>
-            <v-tooltip top>
-              <v-btn icon slot="activator" @click="props.item.autostart = !props.item.autostart">
-                <v-icon>{{props.item.autostart ? 'star' : 'star_border'}}</v-icon>
+      <template v-slot:item.started="{ item }">
+        {{item.started | momentnow}}
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-layout justify-end>
+          <v-menu>
+            <template v-slot:activator="{ on }">
+              <v-btn icon v-on="on">
+                <v-icon>more_vert</v-icon>
               </v-btn>
-              {{props.item.autostart ? 'Disable' : 'Enable'}} Autostart
-            </v-tooltip>
-            <v-menu>
-                <v-btn icon slot="activator">
-                  <v-icon>more_vert</v-icon>
-                </v-btn>
-                <v-card>
-                  <v-list>
-                    <v-list-tile @click="">
-                      <v-list-tile-action>
-                        <v-icon>refresh</v-icon>
-                      </v-list-tile-action>
-                      <v-list-tile-title>Restart</v-list-tile-title>
-                    </v-list-tile>
-                    <v-list-tile @click="">
-                      <v-list-tile-action>
-                        <v-icon>stop</v-icon>
-                      </v-list-tile-action>
-                      <v-list-tile-title>Stop</v-list-tile-title>
-                    </v-list-tile>
-                    <v-list-tile @click="">
-                      <v-list-tile-action>
-                        <v-icon>info</v-icon>
-                      </v-list-tile-action>
-                      <v-list-tile-title>Details</v-list-tile-title>
-                    </v-list-tile>
-                  </v-list>
-                </v-card>
-              </v-menu>
-          </v-layout>
-        </td>
+            </template>
+            <v-card>
+              <v-list>
+                <v-list-item @click="restartScript(item.script.id)">
+                  <v-list-item-action>
+                    <v-icon>refresh</v-icon>
+                  </v-list-item-action>
+                  <v-list-item-title>Restart</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="stopScript(item.script.id)">
+                  <v-list-item-action>
+                    <v-icon>stop</v-icon>
+                  </v-list-item-action>
+                  <v-list-item-title>Stop</v-list-item-title>
+                </v-list-item>
+                <v-list-item :to="'/dashboard/scripts/' + item.script.id">
+                  <v-list-item-action>
+                    <v-icon>info</v-icon>
+                  </v-list-item-action>
+                  <v-list-item-title>Details</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-menu>
+        </v-layout>
       </template>
     </v-data-table>
+    <v-layout justify-center v-else my-4>
+      <h2 class="headline">No scripts running</h2>
+    </v-layout>
   </div>
 </template>
 
@@ -71,17 +66,17 @@
   import {Component, Vue} from 'vue-property-decorator';
   import gql from 'graphql-tag';
 
-  interface RunningScript {
+  interface ScriptLink {
     script: {
       id: string;
       name: string;
     };
-    started: string;
-    autostart: boolean;
+    lastStarted: string;
   }
   interface BotQuery {
-    runningScripts: {
-      nodes: RunningScript[];
+    id: string;
+    scripts: {
+      nodes: ScriptLink[];
     };
   }
 
@@ -91,20 +86,22 @@
         return {
           query: gql`query GetScriptsForBot($id: String!) {
   bot(id: $id) {
-    runningScripts {
+    id
+    scripts {
         nodes {
           script {
             id
             name
           }
-          started
-          autostart
+          lastStarted
         }
     }
   }
 }`,
-          variables: {
-            id: this.$route.params.id
+          variables() {
+            return {
+              id: this.$route.params.id
+            };
           }
         };
       }
@@ -115,7 +112,7 @@
     public readonly tableHeaders = [
       {
         text: 'Name',
-        value: 'name'
+        value: 'script.name'
       },
       {
         text: 'Started',
@@ -124,10 +121,48 @@
       {
         text: '',
         value: 'actions',
-        sortable: false
+        sortable: false,
+        align: 'end'
       }
     ];
-    public selected = [];
+    public selected: ScriptLink[] = [];
+    public async restartScript(id: string) {
+      await this.stopScript(id);
+      const updatedScript = await this.$apollo.mutate({
+        mutation: gql`
+mutation AddScriptToBot($bot: String!, $script: String!) {
+  addScriptToBot(bot: $bot, script: $script) {
+    script {
+      id
+      name
+    }
+    lastStarted
+  }
+}
+        `
+      });
+      const i = (this.bot as BotQuery).scripts.nodes.findIndex((s) => s.script.id === id);
+      this.$set((this.bot as BotQuery).scripts.nodes, i, updatedScript);
+    }
+    public async stopScript(id: string): Promise<void> {
+      await this.$apollo.mutate({
+        mutation: gql`
+mutation RemoveScriptFromBot($bot: String!, $script: String!) {
+  removeScriptFromBot(bot: $bot, script: $script)
+}
+        `,
+        variables: {
+          bot: (this.bot as BotQuery).id,
+          script: id
+        }
+      });
+    }
+    public async restartSelected() {
+      return Promise.all(this.selected.map((s) => this.restartScript(s.script.id)));
+    }
+    public async stopSelected() {
+      return Promise.all(this.selected.map((s) => this.stopScript(s.script.id)));
+    }
   }
 </script>
 

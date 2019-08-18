@@ -1,5 +1,5 @@
 {
-  "name": "waimak",
+  "name": "canal-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,37 +8,35 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@types/graphql": "^14.2.2",
     "apollo-cache-inmemory": "^1.6.2",
     "apollo-client": "^2.6.3",
     "apollo-link": "^1.2.12",
     "apollo-link-http": "^1.5.15",
-    "apollo-link-schema": "^1.2.3",
-    "client-oauth2": "^4.2.4",
+    "brace": "^0.11.1",
     "graphql": "^14.4.1",
-    "graphql-tools": "^4.0.5",
     "moment": "^2.24.0",
+    "sass": "^1.22.8",
     "vue": "^2.6.10",
     "vue-apollo": "^3.0.0-rc.1",
     "vue-class-component": "^6.3.2",
     "vue-property-decorator": "^7.3.0",
     "vue-router": "^3.0.6",
-    "vuetify": "^1.5.16",
+    "vuetify": "^2.0.2",
     "vuex": "^3.1.1",
     "vuex-class": "^0.3.2",
     "vuex-router-sync": "^5.0.0"
   },
   "devDependencies": {
     "@babel/polyfill": "^7.0.0-beta.49",
+    "@types/graphql": "^14.2.2",
     "@vue/cli-plugin-babel": "^3.8.0",
     "@vue/cli-plugin-typescript": "^3.8.1",
-    "@vue/cli-service": "^3.8.4",
+    "@vue/cli-service": "^3.9.3",
     "graphql-tag": "^2.10.1",
-    "node-sass": "^4.12.0",
-    "sass-loader": "^7.0.1",
+    "sass-loader": "^7.1.0",
     "tslint": "^5.16.0",
-    "typescript": "^3.5.2",
-    "vue-cli-plugin-vuetify": "^0.1.6",
+    "typescript": "^3.5.3",
+    "vue-cli-plugin-vuetify": "^0.6.1",
     "vue-template-compiler": "^2.6.10"
   },
   "license": "MIT"

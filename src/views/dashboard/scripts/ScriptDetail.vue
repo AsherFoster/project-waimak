@@ -1,18 +1,20 @@
 <template>
-  <div v-if="script">
+  <v-layout column fill-height>
     <v-toolbar>
-      <v-btn icon to="/dashboard/scripts">
+      <v-btn icon @click="$router.go(-1)">
         <v-icon>arrow_back</v-icon>
       </v-btn>
-      <v-layout @mouseenter="editTitle(true)" @mouseleave="editTitle(false)" align-center>
-        <v-text-field
-                v-if="editingTitle"
-                hide-details
-                v-model="script.name"
-                class="toolbar-title-input title"
-        ></v-text-field>
-        <v-toolbar-title v-else class="toolbar-title-text">{{script.name}}</v-toolbar-title>
-      </v-layout>
+      <v-hover>
+        <template slot-scope="{ hover }">
+          <v-text-field
+                  solo
+                  :flat="!hover"
+                  hide-details
+                  v-model="scriptName"
+                  class="toolbar-title-input title ml-5"
+          ></v-text-field>
+        </template>
+      </v-hover>
       <v-flex></v-flex>
       <v-btn icon>
         <v-icon>delete</v-icon>
@@ -24,40 +26,33 @@
         <v-icon>cloud_upload</v-icon>
       </v-btn>
     </v-toolbar>
-    <div>
-      <v-textarea
-              :disabled="saving"
-              v-model="script.body"
-              @input="bodyDirty = true"
-      ></v-textarea>
-      <v-slide-y-reverse-transition>
-        <v-toolbar v-if="bodyDirty" class="save-popup">
-          <v-flex></v-flex>
-          <v-btn :disabled="saving" @click="saveAndRestart" flat>Save and restart</v-btn>
-          <v-btn :disabled="saving" @click="saveScript">Save</v-btn>
-        </v-toolbar>
-      </v-slide-y-reverse-transition>
-    </div>
+    <AceEditor
+            :value="script ? script.body : ''"
+            @input="bodyChange"
+            :disabled="saving || $apollo.loading || !script"
+    ></AceEditor>
+    <v-banner :value="bodyDirty" single-line class="unsaved-banner">
+      You have unsaved changes
+      <template v-slot:actions>
+        <v-btn :disabled="saving" @click="saveAndRestart" text>Save and restart</v-btn>
+        <v-btn :disabled="saving" @click="saveScript">Save</v-btn>
+      </template>
+    </v-banner>
     <SelectBotForDeployment
+            v-if="script"
             v-model="selectingBotForDeploy"
-            :script="script.id"
+            :script="script && script.id"
             @selected="deployToBot"
     ></SelectBotForDeployment>
-  </div>
+  </v-layout>
 </template>
 
 <script lang="ts">
-  import {Component, Vue} from 'vue-property-decorator';
+  import {Component, Vue, Watch} from 'vue-property-decorator';
   import gql from 'graphql-tag';
+  import {debounce} from '@/util';
   import SelectBotForDeployment from '@/components/SelectBotForDeployment.vue';
-
-  function debounce(func: (...args: any[]) => any, wait: number) {
-    let timeout: number;
-    return (...args: any[]) => {
-      if (timeout) clearTimeout(timeout);
-      timeout = setTimeout(func, wait, args) as unknown as number; // ...sigh
-    };
-  }
+  import AceEditor from '@/components/AceEditor.vue';
 
   interface Script {
     id: string;
@@ -66,7 +61,7 @@
   }
 
   @Component({
-    components: {SelectBotForDeployment},
+    components: {SelectBotForDeployment, AceEditor},
     apollo: {
       script() {
         return {
@@ -79,26 +74,46 @@
 }`,
           variables: {
             id: this.$route.params.id
+          },
+          result(res: {data: {script: Script}}) {
+            this.scriptName = res.data.script.name;
           }
         };
       }
     }
   })
-  export default class Detail extends Vue {
+  export default class ScriptDetail extends Vue {
     public script: Script | null = null;
     public selectingBotForDeploy: boolean = false; // If selection dialog is open
     public bodyDirty: boolean = false; // If the code has been modified, and should be savable
     public saving: boolean = false;
-    public editingTitle: boolean = false;
+    public scriptName: string = '';
 
-    public editTitle(val: boolean) {
-      this.editingTitle = val;
-    }
+    public debouncedTitleChange = debounce(async (name: string) => {
+      // Don't save if not loaded, if it's invalid, or it hasn't changed
+      if (!this.script || !(this.script as Script).name || this.script.name === name) return;
+
+      const newScript = await this.$apollo.mutate({
+        mutation: gql`mutation UpdateScriptName($script: ScriptUpdateInput!) {
+  updateScript(script: $script) {
+    id
+    name
+  }
+}`,
+        variables: {
+          script: {
+            name,
+            id: (this.script as Script).id
+          }
+        }
+      }) as any;
+      this.script.name = newScript.data.updateScript.name;
+      this.scriptName = this.script.name; // Just in case the server modifies it
+    }, 400);
     public deployToBot(id: string) {
-      // STUB
       this.$apollo.mutate({
         mutation: gql`mutation DeployScriptToBot($script: String!, $bot: String!) {
-  runScriptOnBot(script: $script, bot: $bot)
+  addScriptToBot(script: $script, bot: $bot)
 }`,
         variables: {
           script: this.script,
@@ -107,19 +122,20 @@
       });
     }
     public async saveAndRestart(): Promise<void> {
-
+      // TODO implement restart
       await this.saveScript();
     }
     public async saveScript(): Promise<void> {
       this.saving = true;
       await this.$apollo.mutate({
-        mutation: gql`mutation UpdateScript($script: ScriptInput!) {
+        mutation: gql`mutation UpdateScript($script: ScriptUpdateInput!) {
   updateScript(script: $script) {
     body
   }
 }`,
         variables: {
           script: {
+            id: (this.script as Script).id,
             body: (this.script as Script).body // Cast it, if it's saving, it must exist
           }
         }
@@ -137,20 +153,33 @@
         }
       });
     }
+    public bodyChange(val: string) {
+      // Editor is disabled if script doesn't exist, so this will never be true
+      if (!this.script) return;
+      // If it's actually modified, i.e hasn't just been set
+      if (val !== this.script.body) {
+        this.script.body = val;
+        this.bodyDirty = true;
+      }
+    }
+
+    @Watch('scriptName')
+    public titleChange() {
+      this.debouncedTitleChange(this.scriptName);
+    }
   }
 </script>
 
 <style scoped>
-  .save-popup {
+  .unsaved-banner {
     position: absolute;
-    left: 0;
+    z-index: 5;
     bottom: 0;
-  }
-  .toolbar-title-text {
-    letter-spacing: unset;
+    right: 0;
+    width: 100%;
   }
   .toolbar-title-input {
-    max-width: 200px;
     padding-top: 0;
+    font-weight: 400;
   }
 </style>

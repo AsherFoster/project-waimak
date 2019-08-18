@@ -1,37 +1,32 @@
 <template>
   <v-bottom-sheet :value="value" @input="setVisibility">
-    <v-list v-if="!this.$apollo.loading">
-      <v-subheader>Select bot to deploy to:</v-subheader>
-      <v-list-tile v-if="!bots.nodes.length">
-        <v-list-tile-avatar>
+    <v-card flat>
+      <v-list v-if="!this.$apollo.loading && bots && bots.nodes.length">
+        <v-subheader>Select bot to deploy to:</v-subheader>
+        <v-list-item
+                v-for="bot in bots.nodes"
+                :key="bot.id"
+                @click="select(bot.id)"
+                :two-line="!!getDeployWarnings(bot)">
+          <v-list-item-avatar>
+            <img :src="bot.avatarUrl">
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>{{bot.name}}</v-list-item-title>
+            <v-list-item-subtitle v-if="getDeployWarnings(bot)">
+              {{getDeployWarnings(bot)}}
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <p class="title mb-0 py-4 pl-2" v-else-if="!this.$apollo.loading && !bots.nodes.length">
           <v-icon>warning</v-icon>
-        </v-list-tile-avatar>
-        <v-list-tile-title>No bots found</v-list-tile-title>
-      </v-list-tile>
-      <v-list-tile
-              v-else
-              v-for="bot in bots.nodes"
-              :disabled="!bot.connection || bot.connection.state !== 'OK'"
-              :key="bot.id"
-              @click="select(bot.id)">
-        <v-list-tile-avatar>
-          <img :src="bot.avatarUrl" :class="(!bot.connection || bot.connection.state !== 'OK') && 'fade-img'">
-        </v-list-tile-avatar>
-        <v-list-tile-content>
-          <v-list-tile-title>{{bot.name}}</v-list-tile-title>
-          <v-list-tile-sub-title v-if="!bot.connection">
-            Offline
-          </v-list-tile-sub-title>
-          <v-list-tile-sub-title v-else-if="bot.connection.state !== 'OK'">
-            Bot isn't safe to deploy to: ({{bot.connection.state}})
-          </v-list-tile-sub-title>
-          <v-list-tile-sub-title v-else-if="bot.runningScript">
-            Running
-          </v-list-tile-sub-title>
-        </v-list-tile-content>
-      </v-list-tile>
-    </v-list>
-    <v-progress-circular v-else indeterminate></v-progress-circular>
+          No bots found
+      </p>
+      <div v-else class="pl-6 py-4">
+        <v-progress-circular indeterminate></v-progress-circular>
+      </div>
+    </v-card>
   </v-bottom-sheet>
 </template>
 
@@ -44,8 +39,8 @@
     id: string;
     name: string;
     avatarUrl: string;
-    runningScript?: {
-      state: ScriptState
+    script?: {
+      state: ScriptState | null
     };
     connection: {
       state: ConnectionState
@@ -65,7 +60,7 @@
       id
       name
       avatarUrl
-      runningScript(id: $id) {
+      script(id: $id) {
         state
       }
       connection {
@@ -100,11 +95,17 @@
       this.$emit('selected', id);
       this.setVisibility(false);
     }
+    public getDeployWarnings(bot: Bot): string | null {
+      const warns = [];
+      if (bot.connection && bot.connection.state !== 'OK') warns.push('Bot may not be safe to deploy to');
+      if (!bot.connection && !bot.script) warns.push('Script will be deployed when bot next connects');
+      if (bot.connection && bot.script) warns.push('Script will be restarted');
+      if (!bot.connection && bot.script) warns.push('Bot is offline, script will not be restarted');
+
+      return warns.length ? warns.join(', ') : null;
+    }
   }
 </script>
 
 <style scoped>
-  .fade-img {
-    opacity: 0.6;
-  }
 </style>

@@ -5,9 +5,9 @@
         <v-btn
                 color="#677bc4"
                 @click="startOAuth2Flow"
-                large
+                x-large
         >
-          <v-icon left dark>$vuetify.icons.discord</v-icon>
+          <v-icon large left dark>$vuetify.icons.discord</v-icon>
           Login with Discord
         </v-btn>
       </v-layout>

@@ -1,33 +1,25 @@
 <template>
-  <v-app dark>
+  <v-app>
 <!--     Primary View -->
     <div class="fill-height" v-if="ready">
       <drawer></drawer>
-      <v-toolbar dense app :flat="$route.meta.flatToolbar">
+      <v-app-bar dense app :flat="$route.meta.flatToolbar">
         <v-progress-circular v-if="loading" indeterminate size="24" :width="2" color="accent"></v-progress-circular>
         <v-btn v-else icon @click="$router.push('/')">
           <v-icon>home</v-icon>
         </v-btn>
-        <v-breadcrumbs :items="breadcrumbs">
-<!--          TODO: Fix the breadcrumb display -->
-  <!--        <v-breadcrumbs-item-->
-  <!--                v-for="(item, i) in $route.path.split('/').slice(2)"-->
-  <!--                :key="item"-->
-  <!--                exact-->
-  <!--                :to="$route.path.split('/').slice(0, i + 2).join('/')"-->
-  <!--        >{{item | capitalize}}</v-breadcrumbs-item>-->
-        </v-breadcrumbs>
+<!--        <v-breadcrumbs :items="breadcrumbs"></v-breadcrumbs>-->
         <v-spacer></v-spacer>
-      </v-toolbar>
+      </v-app-bar>
       <v-content class="fill-height">
         <router-view></router-view>
       </v-content>
     </div>
 <!--    Error state -->
-    <v-layout v-else-if="error" align-center justify-center>
-      <i class="material-icons">cloud_off</i>
-      <h1>Unable to connect to API</h1>
-      <button class="retry" @click="retryConnect">Retry</button>
+    <v-layout v-else-if="error" align-center justify-center column>
+      <v-icon size="128">cloud_off</v-icon>
+      <h1>Unable to connect :(</h1>
+      <v-btn @click="reload">Refresh</v-btn>
     </v-layout>
 <!--    Loading state -->
     <v-layout v-else align-center justify-center column>
@@ -38,10 +30,9 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
+  import {Component, Vue} from 'vue-property-decorator';
   import Drawer from './Drawer.vue';
   import store from '@/store';
-  import {State} from 'vuex-class';
 
   @Component({
     components: {Drawer},
@@ -55,13 +46,25 @@
   export default class DashboardWrapper extends Vue {
     public ready: boolean = false;
     public error: Error|null = null;
+    public breadcrumbs: string[] = [];
 
     get loading(): boolean {
       return this.$store.state.loading || this.$apollo.loading;
     }
-    get breadcrumbs(): any[] {
-      return this.$route.path.split('/').slice(2).map((text) => ({text}));
-    }
+    // TODO implement breadcrumbs
+    // @Watch('$route')
+    // public onRouteChange() {
+    //   let names = this.$route.matched.slice(1).map(r => {
+    //     console.log(r.instances.default);
+    //     if(r.instances.default) {
+    //       const name = r.instances.default.breadcrumb;
+    //       return typeof name === 'string' ? [name] : name || null;
+    //     } else {
+    //       return r.name || null;
+    //     }
+    //   }).filter(r => !!r);
+    //   this.breadcrumbs = [].concat(...names)
+    // }
     public async created() {
       try {
         await store.dispatch('auth/initialiseUser');
@@ -69,8 +72,11 @@
       } catch (e) {
         // tslint:disable-next-line:no-console
         console.error('Initialization failed:', e);
-        this.$router.push('/login');
+        this.error = e;
       }
+    }
+    public reload() {
+      window.location.reload();
     }
   }
 </script>

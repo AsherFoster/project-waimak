@@ -6,11 +6,11 @@
       </v-avatar>
       <h2 class="ml-3">
         <span class="display-1">{{bot.name}}</span>
-<!--        <span class="caption ma-0">#1337</span>-->
       </h2>
+      <StatusIcon :connection="bot.connection"></StatusIcon>
       <v-spacer></v-spacer>
       <div>
-        <v-btn icon flat color="error">
+        <v-btn icon color="error">
           <v-icon>delete</v-icon>
         </v-btn>
       </div>
@@ -18,6 +18,7 @@
     <v-card-text>
       <p>Platform: {{bot.platform}}</p>
       <p>Created: {{bot.created | momentnow}}</p>
+      <p>API Key: {{bot.apiKey}}<CopyText :value="bot.apiKey" /></p>
     </v-card-text>
   </v-card>
 </template>
@@ -25,28 +26,37 @@
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
   import gql from 'graphql-tag';
+  import StatusIcon from '@/components/StatusIcon.vue';
+  import CopyText from '@/components/CopyText.vue';
 
   interface BotQueryResult {
+    id: string;
     name: string;
+    apiKey: string;
     avatarUrl?: string;
     platform: string;
     created: Date;
   }
 
   @Component({
+    components: {CopyText, StatusIcon},
     apollo: {
       bot() {
         return {
-          query: gql`query GetBotForOverview($id: String!) {
+          query: gql`query GetBotDetails($id: String!) {
   bot(id: $id) {
+    id
     name
+    apiKey
     avatarUrl
     platform
     created
   }
 }`,
-          variables: {
-            id: this.$route.params.id
+          variables() {
+            return {
+              id: this.$route.params.id
+            };
           }
         };
       }

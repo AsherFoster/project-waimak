@@ -4,10 +4,18 @@ import 'vuetify/dist/vuetify.min.css';
 
 import DiscordIcon from '../components/DiscordIcon.vue';
 
-Vue.use(Vuetify, {
+Vue.use(Vuetify);
+
+export default new Vuetify({
   icons: {
-    discord: {
-      component: DiscordIcon
+    iconfont: 'md',
+    values: {
+      discord: {
+        component: DiscordIcon
+      }
     }
+  },
+  theme: {
+    dark: true
   }
 });
