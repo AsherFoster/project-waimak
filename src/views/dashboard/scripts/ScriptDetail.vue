@@ -111,12 +111,18 @@
       this.scriptName = this.script.name; // Just in case the server modifies it
     }, 400);
     public deployToBot(id: string) {
+      if (!this.script) return;
+
       this.$apollo.mutate({
         mutation: gql`mutation DeployScriptToBot($script: String!, $bot: String!) {
-  addScriptToBot(script: $script, bot: $bot)
+  addScriptToBot(script: $script, bot: $bot) {
+    bot {
+      id
+    }
+  }
 }`,
         variables: {
-          script: this.script,
+          script: this.script.id,
           bot: id
         }
       });

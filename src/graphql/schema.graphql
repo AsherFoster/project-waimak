@@ -52,10 +52,13 @@ input UserUpdateInput {
 type Bot {
     id: String!
     name: String!
-    platform: Platform!
-    resourceOwner: User!
-    apiKey: String!
+    discriminator: String
+    discordId: String
+    token: String!
     avatarUrl: String
+    platform: Platform!
+    apiKey: String!
+    resourceOwner: User!
     created: Date!
     createdBy: User
     connection: BotConnection
@@ -83,13 +86,10 @@ input BotOptionsInput {
 input BotCreateInput {
     platform: String!
     token: String
-    deviceCode: String!
 }
 input BotUpdateInput {
     id: String!
-    name: String
     platform: String
-    options: BotOptionsInput
 }
 
 # Jesus christ this is a lot of types for a tiny feature

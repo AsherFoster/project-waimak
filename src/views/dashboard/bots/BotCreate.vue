@@ -26,7 +26,7 @@
             </v-card-text>
             <v-card-actions>
               <v-flex></v-flex>
-              <v-btn @click="step++" :disabled="!formDetailsValid">Next</v-btn>
+              <v-btn @click="createBot" :loading="loading" :disabled="!formDetailsValid">Next</v-btn>
             </v-card-actions>
           </v-card>
         </v-expansion-panel-content>
@@ -38,19 +38,19 @@
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-card flat>
-            <v-card-text>
+            <v-card-text v-if="bot">
               <v-layout justify-center align-center>
                 <v-flex shrink>
                   <v-avatar size="80">
-                    <img src="//cdn.discordapp.com/avatars/269783357297131521/80c311e9817186aa764c53bd0800edba.png?size=256">
+                    <img :src="bot.avatarUrl">
                   </v-avatar>
                 </v-flex>
                 <v-flex shrink class="ma-2">
                   <p class="headline mb-1">
-                    Pointless Bot
-                    <span class="caption">#1234</span>
+                    {{bot.name}}
+                    <span class="caption">#{{bot.discriminator}}</span>
                   </p>
-                  <p class="caption mb-0">ID: 75827298397323264</p>
+                  <p class="caption mb-0">ID: {{bot.discordId}}</p>
                 </v-flex>
               </v-layout>
               <v-divider class="my-4"></v-divider>
@@ -60,14 +60,17 @@
               <h3 class="title">Your bot's API key</h3>
               <p class="mb-0">You'll need this to connect your client to Canal</p>
               <div>
-                <code>6ea2081aa573d9eed3af6e608ab4bf34</code>
-                <CopyText :value="'6ea2081aa573d9eed3af6e608ab4bf34'"></CopyText>
+                <code>{{bot.apiKey}}</code>
+                <CopyText :value="bot.apiKey"></CopyText>
               </div>
+            </v-card-text>
+            <v-card-text v-else>
+              <h2>Something unexpected happened. Sorry about that.</h2>
             </v-card-text>
             <v-card-actions>
               <v-flex></v-flex>
               <v-btn text>Docs</v-btn>
-              <v-btn :to="'/dashboard/bots/' + '12345'">Go to bot</v-btn>
+              <v-btn :to="'/dashboard/bots/' + bot.id">Go to bot</v-btn>
             </v-card-actions>
           </v-card>
         </v-expansion-panel-content>
@@ -77,10 +80,6 @@
 </template>
 
 <script lang="ts">
-  /*
-   * File todos:
-   * TODO Improve logic for showing done symbol (keep when going back?)
-   * */
   import {Component, Vue} from 'vue-property-decorator';
   import {Platform} from '@/graphql/schema-types';
   import gql from 'graphql-tag';
@@ -90,6 +89,14 @@
     name: string;
     id: Platform;
   }
+  interface Bot {
+    id: string;
+    name: string;
+    discriminator: string;
+    avatarUrl: string;
+    discordId: string;
+    apiKey: string;
+  }
 
   @Component({
     components: {CopyText}
@@ -98,35 +105,37 @@
     public step: number = 0;
     public loading: boolean = false;
 
-    public name: string = '';
     public token: string = '';
     public platform: Platform = 'NODEJS';
     public formDetailsValid: boolean = false;
     public readonly platforms: PlatformMap[] = [{name: 'Node.js', id: 'NODEJS'}];
 
-    public bot: any = {id: 'abc123'};
+    public bot: Bot | null = null;
 
     public formLinkValid: boolean = false;
-    public deviceCode: string = '';
-    public async submitDeviceCode(): Promise<void> {
+    public async createBot(): Promise<void> {
       this.loading = true;
-      await this.$apollo.mutate({
-        mutation: gql`mutation AddABotToAccount($bot: BotCreateInput) {
+      const resp = await this.$apollo.mutate({
+        mutation: gql`mutation AddABotToAccount($bot: BotCreateInput!) {
   createBot(bot: $bot) {
     id
     name
+    discriminator
+    avatarUrl
+    discordId
+    apiKey
   }
 }`,
         variables: {
-          platform: this.platform,
-          token: this.token,
-          deviceCode: this.deviceCode
+          bot: {
+            platform: this.platform,
+            token: this.token,
+          }
         }
       });
-      setTimeout(() => {
-        this.loading = false;
-        this.step++;
-      }, 1000);
+      this.bot = resp.data.createBot;
+      this.loading = false;
+      this.step++;
     }
     public required(val?: string): true|string {
       if (val) return true;
