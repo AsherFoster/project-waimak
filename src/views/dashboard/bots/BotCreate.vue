@@ -37,8 +37,8 @@
           Done
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-card flat>
-            <v-card-text v-if="bot">
+          <v-card flat v-if="bot">
+            <v-card-text>
               <v-layout justify-center align-center>
                 <v-flex shrink>
                   <v-avatar size="80">
@@ -64,14 +64,14 @@
                 <CopyText :value="bot.apiKey"></CopyText>
               </div>
             </v-card-text>
-            <v-card-text v-else>
-              <h2>Something unexpected happened. Sorry about that.</h2>
-            </v-card-text>
             <v-card-actions>
               <v-flex></v-flex>
               <v-btn text>Docs</v-btn>
               <v-btn :to="'/dashboard/bots/' + bot.id">Go to bot</v-btn>
             </v-card-actions>
+          </v-card>
+          <v-card v-else>
+            <h2>Something unexpected happened. Sorry about that.</h2>
           </v-card>
         </v-expansion-panel-content>
       </v-expansion-panel>

@@ -131,20 +131,27 @@
       const index = (this.scripts as ScriptQuery).nodes.findIndex((s) => s.id === script.id);
       (this.scripts as ScriptQuery).nodes.splice(index, 1);
     }
-    public async createScript() {
-      const resp = await this.$apollo.mutate({
-        mutation: gql`mutation CreateUntitledScript($script: ScriptCreateInput!) {
-  createScript(script: $script) {
-    id
+    public async restartScript(script: Script): Promise<void> {
+      await this.$apollo.mutate({
+        mutation: gql`mutation RestartScript($script: String!) {
+  restartScriptEverywhere(script: $script) {
+    bot {
+      name
+    }
   }
 }`,
         variables: {
-          script: {
-            name: 'untitled-script',
-            platform: 'NODEJS',
-            body: ''
-          }
+          script: script.id
         }
+      })
+    }
+    public async createScript() {
+      const resp = await this.$apollo.mutate({
+        mutation: gql`mutation CreateNewScript {
+  createScript {
+    id
+  }
+}`
       });
       this.$router.push('/dashboard/scripts/' + resp.data.createScript.id);
     }

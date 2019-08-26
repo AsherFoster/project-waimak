@@ -142,8 +142,8 @@ type Scripts {
 }
 input ScriptCreateInput {
     name: String!
-    body: String
-    platform: Platform!
+    body: String!
+    platform: Platform
 }
 input ScriptUpdateInput {
     id: String!
@@ -157,8 +157,8 @@ type ScriptLink {
     bot: Bot!
     lastStarted: Date!
     state: ScriptState
-    added: Date!
-    addedBy: User
+    created: Date!
+    createdBy: User
 }
 type ScriptLinks {
     totalCount: Int!
@@ -177,7 +177,7 @@ type Query {
 
 type Mutation {
     # Script CRUD
-    createScript(script: ScriptCreateInput!): Script
+    createScript(script: ScriptCreateInput): Script
     updateScript(script: ScriptUpdateInput!): Script
     deleteScript(script: String!): String!
 
@@ -185,6 +185,7 @@ type Mutation {
     addScriptToBot(script: String!, bot: String!): ScriptLink!
     removeScriptFromBot(script: String!, bot: String!): String!
     restartScriptOnBot(script: String!, bot: String!): ScriptLink!
+    restartScriptEverywhere(script: String!): [ScriptLink]!
 
     # Bot CRUD
     createBot(bot: BotCreateInput!): Bot
