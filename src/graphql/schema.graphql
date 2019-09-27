@@ -155,7 +155,7 @@ input ScriptUpdateInput {
 type ScriptLink {
     script: Script!
     bot: Bot!
-    lastStarted: Date!
+    lastStarted: Date
     state: ScriptState
     created: Date!
     createdBy: User

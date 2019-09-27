@@ -143,7 +143,7 @@
         variables: {
           script: script.id
         }
-      })
+      });
     }
     public async createScript() {
       const resp = await this.$apollo.mutate({

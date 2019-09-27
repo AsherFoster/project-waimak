@@ -6,6 +6,7 @@ import {DISCORD_OAUTH_CLIENT_ID} from '@/config';
 import {apolloClient} from '@/plugins/apollo';
 import gql from 'graphql-tag';
 import {ApolloError} from 'apollo-client';
+import {getApolloErrorCode} from '@/util';
 
 const AUTH_SCOPES = ['identify', 'email'];
 const REDIRECT_URI = 'http://localhost:4000/api/oauth/discord/callback';
@@ -77,13 +78,7 @@ const authentication: Module<AuthenticationState, RootState> = {
           });
           context.commit('saveUser', resp.data.user);
         } catch (e) {
-          if ( // ick, TODO surely there's a better way to do this
-            (e as ApolloError).networkError &&
-            (e as ApolloError).networkError.result &&
-            (e as ApolloError).networkError.result.errors &&
-            (e as ApolloError).networkError.result.errors[0].extensions &&
-            (e as ApolloError).networkError.result.errors[0].extensions.code === 'UNAUTHENTICATED'
-          ) {
+          if (getApolloErrorCode(e) === 'UNAUTHENTICATED') {
             await context.dispatch('localLogout');
             throw new Error('Authentication failed');
           } else {

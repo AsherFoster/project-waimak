@@ -3,7 +3,7 @@
     <v-toolbar dense>
       <span v-if="selected.length">{{selected.length}} script{{selected.length > 1 ? 's' : ''}} selected</span>
       <v-spacer></v-spacer>
-      <v-btn icon :disabled="!selected.length" @click="restartSelected">
+      <v-btn icon @click="refreshList">
         <v-icon>refresh</v-icon>
       </v-btn>
       <v-btn icon :disabled="!selected.length" @click="stopSelected">
@@ -126,25 +126,27 @@
       }
     ];
     public selected: ScriptLink[] = [];
-    public async restartScript(id: string) {
-      await this.stopScript(id);
-      const updatedScript = await this.$apollo.mutate({
-        mutation: gql`
-mutation AddScriptToBot($bot: String!, $script: String!) {
-  addScriptToBot(bot: $bot, script: $script) {
-    script {
-      id
-      name
+    public async refreshList(): Promise<void> {
+      await this.$apollo.queries.bot.refetch();
     }
+    public async restartScript(id: string, reloadAfter: boolean = true) {
+      if (!this.bot) return; // Sanity check
+      await this.$apollo.mutate({
+        mutation: gql`
+mutation RestartScriptOnBot($bot: String!, $script: String!) {
+  restartScriptOnBot(bot: $bot, script: $script) {
     lastStarted
   }
 }
-        `
+        `,
+        variables: {
+          bot: this.bot.id,
+          script: id
+        }
       });
-      const i = (this.bot as BotQuery).scripts.nodes.findIndex((s) => s.script.id === id);
-      this.$set((this.bot as BotQuery).scripts.nodes, i, updatedScript);
+      if(reloadAfter) await this.refreshList();
     }
-    public async stopScript(id: string): Promise<void> {
+    public async stopScript(id: string, reloadAfter: boolean = true): Promise<void> {
       await this.$apollo.mutate({
         mutation: gql`
 mutation RemoveScriptFromBot($bot: String!, $script: String!) {
@@ -156,12 +158,13 @@ mutation RemoveScriptFromBot($bot: String!, $script: String!) {
           script: id
         }
       });
+      if (reloadAfter) this.refreshList();
     }
     public async restartSelected() {
-      return Promise.all(this.selected.map((s) => this.restartScript(s.script.id)));
+      return Promise.all(this.selected.map((s) => this.restartScript(s.script.id, false)));
     }
     public async stopSelected() {
-      return Promise.all(this.selected.map((s) => this.stopScript(s.script.id)));
+      return Promise.all(this.selected.map((s) => this.stopScript(s.script.id), false));
     }
   }
 </script>

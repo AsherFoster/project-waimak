@@ -22,7 +22,7 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import {State} from "vuex-class";
+  import {State} from 'vuex-class';
   import {User} from '@/store/authentication';
 
   @Component({})
