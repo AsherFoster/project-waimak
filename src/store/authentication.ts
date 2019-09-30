@@ -5,11 +5,13 @@ import {RootState} from './index';
 import {DISCORD_OAUTH_CLIENT_ID} from '@/config';
 import {apolloClient} from '@/plugins/apollo';
 import gql from 'graphql-tag';
-import {ApolloError} from 'apollo-client';
 import {getApolloErrorCode} from '@/util';
 
 const AUTH_SCOPES = ['identify', 'email'];
-const REDIRECT_URI = 'http://localhost:4000/api/oauth/discord/callback';
+const REDIRECT_URI = process.env.NODE_ENV === 'prod' ?
+    'http://api.canal.pointless.me/oauth/discord/callback' :
+    'http://localhost:4080/oauth/discord/callback'
+;
 
 export interface User {
   id: string;
@@ -89,6 +91,7 @@ const authentication: Module<AuthenticationState, RootState> = {
           }
         }
       } else {
+        await context.dispatch('localLogout');
         throw new Error('No authorization token!');
       }
     },
