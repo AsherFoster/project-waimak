@@ -2,16 +2,9 @@ import {Module, GetterTree, ActionContext, ActionTree, MutationTree} from 'vuex'
 import router from '@/router';
 import {RootState} from './index';
 
-import {DISCORD_OAUTH_CLIENT_ID} from '@/config';
 import {apolloClient} from '@/plugins/apollo';
 import gql from 'graphql-tag';
 import {getApolloErrorCode} from '@/util';
-
-const AUTH_SCOPES = ['identify', 'email'];
-const REDIRECT_URI = process.env.NODE_ENV === 'prod' ?
-    'http://api.canal.pointless.me/oauth/discord/callback' :
-    'http://localhost:4080/oauth/discord/callback'
-;
 
 export interface User {
   id: string;
@@ -33,10 +26,6 @@ export interface AuthCompletionData {
 
 export type Context = ActionContext<AuthenticationState, RootState>;
 export type AuthProvider = 'DISCORD'; // Just in case I want other identity providers
-
-function generateState() {
-  return Math.random().toString(36).substr(2);
-}
 
 const authentication: Module<AuthenticationState, RootState> = {
   namespaced: true,
@@ -65,34 +54,31 @@ const authentication: Module<AuthenticationState, RootState> = {
   actions: {
     async initialiseUser(context: Context): Promise<void> {
       const token = localStorage.getItem('auth_token');
-      if (token) {
-        await context.commit('saveToken', token);
-        try {
-          const resp = await apolloClient.query({
-            query: gql`query GetInitialUser {
-                user {
-                    id
-                    name
-                    avatarUrl
-                    email
-                }
-            }`
-          });
-          context.commit('saveUser', resp.data.user);
-        } catch (e) {
-          if (getApolloErrorCode(e) === 'UNAUTHENTICATED') {
-            await context.dispatch('localLogout');
-            throw new Error('Authentication failed');
-          } else {
-            // TODO this area needs error logging
-            // tslint:disable-next-line:no-console
-            console.error(e);
-            throw new Error('An unknown error occurred during initialisation!');
-          }
+      if (!token) throw new Error('Dashboard auth guard has been bypassed? Wtf? (no token)');
+
+      await context.commit('saveToken', token);
+      try {
+        const resp = await apolloClient.query({
+          query: gql`query GetInitialUser {
+              user {
+                  id
+                  name
+                  avatarUrl
+                  email
+              }
+          }`
+        });
+        context.commit('saveUser', resp.data.user);
+      } catch (e) {
+        if (getApolloErrorCode(e) === 'UNAUTHENTICATED') {
+          await context.dispatch('localLogout');
+          throw new Error('Dashboard auth guard has been bypassed? Wtf? (auth failed)');
+        } else {
+          // TODO this area needs error logging
+          // tslint:disable-next-line:no-console
+          console.error(e);
+          throw new Error('An unknown error occurred during initialisation!');
         }
-      } else {
-        await context.dispatch('localLogout');
-        throw new Error('No authorization token!');
       }
     },
     async logout(context: Context): Promise<void> {
@@ -110,34 +96,6 @@ const authentication: Module<AuthenticationState, RootState> = {
       localStorage.removeItem('auth_expires');
       window.location.href = '/login'; // Not router, to make it reload
     },
-    async oAuthComplete(context: Context): Promise<void> {
-      const search = window.location.search;
-      const query = new URLSearchParams(search);
-      if (query.get('error')) {
-        context.state.authError = query.get('error');
-      } else {
-        localStorage.setItem('auth_token', query.get('sess') as string);
-        localStorage.setItem('auth_expires',
-          // Sets auth_expires to current time plus expiry duration
-          new Date(Date.now () + (+(query.get('expires') as string) * 1000)).toISOString()
-        );
-        // context.state.authComplete = {
-        //   isNewUser: query.get('newuser') === 'true',
-        //   provider: query.get('provider') as AuthProvider
-        // };
-        // context.state.token = query.get('sess') as string;
-        // context.state.expires = +(query.get('expires') as string);
-      }
-      router.push('/dashboard');
-    },
-    startOAuth2Flow(context: Context, provider: AuthProvider = 'DISCORD'): void {
-      const state = generateState();
-      localStorage.setItem('oauth2state', state);
-      const scopes = encodeURIComponent(AUTH_SCOPES.join(' '));
-      window.location.href = `https://discordapp.com/api/oauth2/authorize?response_type=code&`
-        + `client_id=${DISCORD_OAUTH_CLIENT_ID}&scope=${scopes}&state=${state}`
-        + `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-    }
   } as ActionTree<AuthenticationState, RootState>
 };
 

@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Dashboard from './views/dashboard/Dashboard.vue';
+import {checkAuthentication} from '@/util';
 
 Vue.use(Router);
 
@@ -38,15 +39,23 @@ const router = new Router({
         {path: 'settings', component: () => import('./views/dashboard/settings/SettingsView.vue')},
         {path: 'settings/deleteaccount', component: () => import('./views/dashboard/settings/DeleteAccount.vue')},
         {path: '*', component: () => import('./views/Error404.vue')}
-      ]
+      ],
+      async beforeEnter(to, from, next) {
+        if (await checkAuthentication()) {
+          next();
+        } else {
+          // Please, please don't cause a loop
+          window.location.href = 'https://api.canal.pointless.me/oauth/discord/start';
+        }
+      }
     },
     {
       path: '/login',
       component: () => import('./views/auth/Login.vue')
     },
     {
-      path: '/auth/complete',
-      component: () => import('./views/auth/Complete.vue')
+      path: '/auth/callback',
+      component: () => import('./views/auth/Callback.vue')
     },
     {
       path: '*',

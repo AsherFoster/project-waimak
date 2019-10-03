@@ -30,9 +30,7 @@
     public accepted: boolean = false;
     public enteredEmail: string = '';
     @State('user', {namespace: 'auth'}) public account!: User;
-    public doDeleteAccount() {
-      
-    }
+    public doDeleteAccount() {}
   }
 </script>
 

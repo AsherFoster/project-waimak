@@ -4,14 +4,14 @@
       <v-layout align-center justify-center>
         <v-btn
                 color="#677bc4"
-                @click="startOAuth2Flow"
+                :href="authUrl"
                 x-large
         >
           <v-icon large left dark>$vuetify.icons.discord</v-icon>
           Login with Discord
         </v-btn>
       </v-layout>
-      <v-btn class="corner" icon href="//asherfoster.com/things/dsbweb">
+      <v-btn class="corner" icon href="//canal.asherfoster.com">
         <v-icon color="grey">info</v-icon>
       </v-btn>
     </v-container>
@@ -21,11 +21,11 @@
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
 
-  @Component({
-  })
+  @Component({})
   export default class Login extends Vue {
-    public infoOpen = false;
-    public startOAuth2Flow = () => this.$store.dispatch('auth/startOAuth2Flow');
+    public authUrl: string = (process.env.NODE_ENV === 'prod' ?
+      'https://api.canal.asherfoster.com' :
+      'http://localhost:4080') + '/oauth/discord/start';
   }
 </script>
 
