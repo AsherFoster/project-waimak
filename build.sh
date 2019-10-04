@@ -1,3 +1,3 @@
-BRANCH_ENV=$([ $TRAVIS_BRANCH == "develop"] && echo "beta" || echo "production")
+export NODE_ENV=$([[ $TRAVIS_BRANCH == "develop" ]] && echo "beta" || echo "production")
 
-NODE_ENV=$BRANCH_ENV npm run build
+npm run build
