@@ -12,7 +12,7 @@
         <v-list :class="mini || 'pt-0'" nav>
           <v-tooltip v-for="link in links" :key="link.name" right :disabled="!mini">
             <template v-slot:activator="{ on }">
-              <v-list-item v-on="on" :to="link.path" :exact="link.path === '/dashboard'">
+              <v-list-item v-on="on" :to="link.path" :exact="link.path === '/'">
                 <v-list-item-action>
                   <v-icon>{{link.icon}}</v-icon>
                 </v-list-item-action>
@@ -52,13 +52,13 @@
               </div>
               <v-divider></v-divider>
               <v-list>
-                <v-list-item to="/dashboard/settings">
+                <v-list-item to="/settings">
                   <v-list-item-action>
                     <v-icon>settings</v-icon>
                   </v-list-item-action>
                   <v-list-item-title>Settings</v-list-item-title>
                 </v-list-item>
-                <v-list-item to="/dashboard/about">
+                <v-list-item to="/about">
                   <v-list-item-action>
                     <v-icon>info</v-icon>
                   </v-list-item-action>
@@ -108,27 +108,27 @@
       {
         icon: 'dashboard',
         name: 'Home',
-        path: '/dashboard'
+        path: '/'
       },
       {
         icon: 'android',
         name: 'Bots',
-        path: '/dashboard/bots'
+        path: '/bots'
       },
       {
         icon: 'description',
         name: 'Scripts',
-        path: '/dashboard/scripts'
+        path: '/scripts'
       },
       {
         icon: 'account_circle',
         name: 'Users',
-        path: '/dashboard/users'
+        path: '/users'
       },
       {
         icon: 'bug_report',
         name: 'Debug',
-        path: '/dashboard/debug'
+        path: '/debug'
       }
     ];
     @Watch('mini')

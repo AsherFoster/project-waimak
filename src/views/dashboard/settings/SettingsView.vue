@@ -2,7 +2,7 @@
   <v-layout fill-height>
     <v-navigation-drawer>
       <v-list shaped>
-        <v-list-item to="/dashboard/settings">
+        <v-list-item to="/settings">
           Home
         </v-list-item>
       </v-list>
@@ -10,7 +10,7 @@
     <div>
       <p>Hi, Pointless</p>
       <p>Email: me@asherfoster.com</p>
-      <v-btn color="error" text to="/dashboard/settings/deleteaccount">Delete Account</v-btn>
+      <v-btn color="error" text to="/settings/deleteaccount">Delete Account</v-btn>
     </div>
   </v-layout>
 </template>

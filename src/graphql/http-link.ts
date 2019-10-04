@@ -1,12 +1,11 @@
 import {ApolloLink, concat, NextLink, Operation, RequestHandler} from 'apollo-link';
 import {createHttpLink} from 'apollo-link-http';
+import {apiHost} from '@/util';
 
 // HTTP connection to the API
 const httpLink = createHttpLink({
   // You should use an absolute URL here
-  uri: process.env.NODE_ENV === 'production' ?
-      'http://api.canal.asherfoster.com/graphql' :
-      'http://localhost:4080/graphql',
+  uri: apiHost + '/graphql',
 });
 
 const authMiddleware = new ApolloLink(((operation: Operation, forward?: NextLink) => {

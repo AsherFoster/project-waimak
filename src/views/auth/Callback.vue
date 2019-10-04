@@ -28,7 +28,7 @@
     public error: string | null = null;
 
     public next() {
-      this.$router.push('/dashboard');
+      this.$router.push('/');
     }
 
     public async created() {
@@ -38,6 +38,7 @@
         this.error = query.get('error');
       } else if (query.get('sess') && query.get('expires')) {
         // this.newUser = query.get('newuser') === 'true';
+        console.log('Saving token!', query.get('sess'));
         localStorage.setItem('auth_token', query.get('sess') as string);
         localStorage.setItem('auth_expires', new Date(+(query.get('expires') as string)).toISOString());
       } else {

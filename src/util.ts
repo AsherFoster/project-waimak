@@ -2,6 +2,20 @@ import {ApolloError} from 'apollo-client';
 import {apolloClient} from '@/plugins/apollo';
 import gql from 'graphql-tag';
 
+let host;
+switch (process.env.NODE_ENV) {
+  case 'production':
+    host = 'https://api.canal.asherfoster.com';
+    break;
+  case 'beta':
+    host = 'https://api.beta.canal.asherfoster.com';
+    break;
+  default:
+    host =  'http://localhost:4080';
+}
+
+export const apiHost = host;
+
 export function debounce(func: (...args: any[]) => any, wait: number) {
   let timeout: NodeJS.Timer;
   return function debounced(...args: any[]) {

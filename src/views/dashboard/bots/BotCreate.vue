@@ -55,8 +55,8 @@
               </v-layout>
               <v-divider class="my-4"></v-divider>
               <h3 class="title">What next?</h3>
-              <p>Check out the <a>docs</a> for more info, or dive right in and <router-link :to="'/dashboard/bots/' + bot.id">configure it</router-link>,
-                or head to <router-link to="/dashboard/scripts">scripts</router-link> and get started writing your first script!</p>
+              <p>Check out the <a>docs</a> for more info, or dive right in and <router-link :to="'/bots/' + bot.id">configure it</router-link>,
+                or head to <router-link to="/scripts">scripts</router-link> and get started writing your first script!</p>
               <h3 class="title">Your bot's API key</h3>
               <p class="mb-0">You'll need this to connect your client to Canal</p>
               <div>
@@ -67,7 +67,7 @@
             <v-card-actions>
               <v-flex></v-flex>
               <v-btn text>Docs</v-btn>
-              <v-btn :to="'/dashboard/bots/' + bot.id">Go to bot</v-btn>
+              <v-btn :to="'/bots/' + bot.id">Go to bot</v-btn>
             </v-card-actions>
           </v-card>
           <v-card v-else>
