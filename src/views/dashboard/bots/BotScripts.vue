@@ -44,7 +44,7 @@
                   </v-list-item-action>
                   <v-list-item-title>Stop</v-list-item-title>
                 </v-list-item>
-                <v-list-item :to="'/dashboard/scripts/' + item.script.id">
+                <v-list-item :to="'/scripts/' + item.script.id">
                   <v-list-item-action>
                     <v-icon>info</v-icon>
                   </v-list-item-action>
@@ -144,7 +144,7 @@ mutation RestartScriptOnBot($bot: String!, $script: String!) {
           script: id
         }
       });
-      if(reloadAfter) await this.refreshList();
+      if (reloadAfter) await this.refreshList();
     }
     public async stopScript(id: string, reloadAfter: boolean = true): Promise<void> {
       await this.$apollo.mutate({

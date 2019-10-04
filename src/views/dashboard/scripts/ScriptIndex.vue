@@ -23,7 +23,7 @@
       <template v-slot:item="{item}">
         <tr>
           <td>
-            <router-link  :to="'/dashboard/scripts/' + item.id">
+            <router-link  :to="'/scripts/' + item.id">
               {{item.name}}
             </router-link>
           </td>
@@ -153,7 +153,7 @@
   }
 }`
       });
-      this.$router.push('/dashboard/scripts/' + resp.data.createScript.id);
+      this.$router.push('/scripts/' + resp.data.createScript.id);
     }
     public async reload() {
       await this.$apollo.queries.scripts.refetch();

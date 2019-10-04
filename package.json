@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "test": "echo we should probably add this..."
   },
   "dependencies": {
     "apollo-cache-inmemory": "^1.6.2",

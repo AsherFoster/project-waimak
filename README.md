@@ -1,9 +1,6 @@
 # Canal Web
 Now 100% more generic
 
-## Environment Variables
-- VUE_APP_DISCORD_CLIENT_ID (used for OAuth)
-
 ## Project setup
 ```
 npm install

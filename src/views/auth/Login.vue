@@ -20,12 +20,13 @@
 
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
+  import {apiHost} from "@/util";
 
   @Component({})
   export default class Login extends Vue {
-    public authUrl: string = (process.env.NODE_ENV === 'prod' ?
-      'https://api.canal.asherfoster.com' :
-      'http://localhost:4080') + '/oauth/discord/start';
+    public get authUrl(): string {
+      return apiHost + '/oauth/discord/start';
+    }
   }
 </script>
 

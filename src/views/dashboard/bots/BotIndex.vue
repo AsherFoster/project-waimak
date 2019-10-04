@@ -3,7 +3,7 @@
     <v-layout v-if="!$apollo.loading && bots.nodes.length" wrap>
       <v-flex xs12 sm6 md4 v-for="bot in bots.nodes" :key="bot.id" pa-3>
         <v-card class="bot-card">
-          <router-link :to="'/dashboard/bots/' + bot.id" class="hidden-link">
+          <router-link :to="'/bots/' + bot.id" class="hidden-link">
             <v-card-title>
               <v-avatar>
                 <img :src="bot.avatarUrl">
@@ -15,7 +15,7 @@
           <v-card-text>
             <v-layout>
               <v-flex md6>
-                <router-link :to="`/dashboard/bots/${bot.id}/scripts`" class="hidden-link">
+                <router-link :to="`/bots/${bot.id}/scripts`" class="hidden-link">
                     <p class="headline mb-0">{{bot.scripts.totalCount}}</p>
                     <p>linked scripts</p>
                 </router-link>
@@ -47,7 +47,7 @@
       </v-flex>
       <v-flex md4 pa-3>
         <v-layout align-center justify-center column class="bot-card">
-          <v-btn fab to="/dashboard/bots/link" color="accent">
+          <v-btn fab to="/bots/link" color="accent">
             <v-icon>add</v-icon>
           </v-btn>
         </v-layout>
@@ -56,7 +56,7 @@
     <v-layout v-else-if="!$apollo.loading" align-center fill-height justify-center column>
       <h1>No bots found</h1>
       <p>Let's change that!</p>
-      <v-btn to="/dashboard/bots/link" color="accent" large>
+      <v-btn to="/bots/link" color="accent" large>
         Link a bot
       </v-btn>
     </v-layout>

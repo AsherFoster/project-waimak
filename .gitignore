@@ -1,5 +1,8 @@
 .idea
 dist
+# Exlude plaintext secrets
+secrets/*
+!secrets/*.enc
 
 # Created by .ignore support plugin (hsz.mobi)
 ### JetBrains template

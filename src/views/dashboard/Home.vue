@@ -10,7 +10,7 @@
     <v-layout row wrap v-if="bots && bots.nodes.length">
       <v-flex xs12 md6 pa-2 v-for="bot in bots.nodes" :key="bot.id">
         <v-card>
-          <router-link :to="'/dashboard/bots/' + bot.id">
+          <router-link :to="'/bots/' + bot.id">
             <v-card-title primary-title>
               <v-avatar size="38" class="avatar" slot="activator">
                 <img :src="bot.avatarUrl">
@@ -49,7 +49,7 @@
     </v-layout>
     <v-layout v-else-if="bots && bots.nodes" align-center class="my-6" column>
       <p>You don't have any bots yet!</p>
-      <v-btn to="/dashboard/bots/link">Make one!</v-btn>
+      <v-btn to="/bots/link">Make one!</v-btn>
     </v-layout>
   </div>
 </template>

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Dashboard from './views/dashboard/Dashboard.vue';
-import {checkAuthentication} from '@/util';
+import {apiHost, checkAuthentication} from '@/util';
 
 Vue.use(Router);
 
@@ -9,13 +9,18 @@ const flatToolbar = true;
 
 const router = new Router({
   mode: 'history',
+  base: (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'beta') ? '/app/' : '',
   routes: [
     {
-      path: '/',
-      redirect: '/dashboard',
+      path: '/login',
+      component: () => import('./views/auth/Login.vue')
     },
     {
-      path: '/dashboard',
+      path: '/auth/callback',
+      component: () => import('./views/auth/Callback.vue')
+    },
+    {
+      path: '/',
       component: Dashboard,
       children: [
         {path: '', component: () => import('./views/dashboard/Home.vue')},
@@ -41,21 +46,14 @@ const router = new Router({
         {path: '*', component: () => import('./views/Error404.vue')}
       ],
       async beforeEnter(to, from, next) {
+        console.log('Router guard!');
         if (await checkAuthentication()) {
           next();
         } else {
           // Please, please don't cause a loop
-          window.location.href = 'https://api.canal.pointless.me/oauth/discord/start';
+          window.location.href = apiHost + '/oauth/discord/start';
         }
       }
-    },
-    {
-      path: '/login',
-      component: () => import('./views/auth/Login.vue')
-    },
-    {
-      path: '/auth/callback',
-      component: () => import('./views/auth/Callback.vue')
     },
     {
       path: '*',
