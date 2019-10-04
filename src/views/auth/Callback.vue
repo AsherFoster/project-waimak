@@ -36,7 +36,7 @@
       const query = new URLSearchParams(search);
       if (query.get('error')) {
         this.error = query.get('error');
-      } else if(query.get('sess') && query.get('expires')) {
+      } else if (query.get('sess') && query.get('expires')) {
         // this.newUser = query.get('newuser') === 'true';
         localStorage.setItem('auth_token', query.get('sess') as string);
         localStorage.setItem('auth_expires', new Date(+(query.get('expires') as string)).toISOString());

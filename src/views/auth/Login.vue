@@ -25,7 +25,7 @@
   export default class Login extends Vue {
     public get authUrl(): string {
       let host;
-      switch(process.env.NODE_ENV) {
+      switch (process.env.NODE_ENV) {
         case 'production':
           host = 'https://api.canal.asherfoster.com';
           break;

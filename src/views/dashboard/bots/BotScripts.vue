@@ -144,7 +144,7 @@ mutation RestartScriptOnBot($bot: String!, $script: String!) {
           script: id
         }
       });
-      if(reloadAfter) await this.refreshList();
+      if (reloadAfter) await this.refreshList();
     }
     public async stopScript(id: string, reloadAfter: boolean = true): Promise<void> {
       await this.$apollo.mutate({
