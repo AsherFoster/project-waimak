@@ -23,6 +23,6 @@ deploy:
 
 before_deploy:
 - openssl aes-256-cbc -K $encrypted_ad9a1014c2de_key -iv $encrypted_ad9a1014c2de_iv
-  -in gcs-dev.json.enc -out secrets/gcs-dev.json -d
+  -in secrets/gcs-dev.json.enc -out secrets/gcs-dev.json -d
 - openssl aes-256-cbc -K $encrypted_ad9a1014c2de_key -iv $encrypted_ad9a1014c2de_iv
-  -in gcs-prod.json.enc -out secrets/gcs-prod.json -d
+  -in secrets/gcs-prod.json.enc -out secrets/gcs-prod.json -d
