@@ -10,8 +10,9 @@ export function debounce(func: (...args: any[]) => any, wait: number) {
   };
 }
 
-export function getApolloErrorCode(e: ApolloError): string | void {
-  if (!(e instanceof ApolloError)) return;
+export function getApolloErrorCode(e: any): string | void {
+  // if (!(e instanceof ApolloError)) return;
+  // The type guard would be nice, but it stops the following code from working :(
   return e.networkError &&
     e.networkError.result &&
     e.networkError.result.errors &&

@@ -9,16 +9,13 @@ const flatToolbar = true;
 
 const router = new Router({
   mode: 'history',
+  base: process.env.NODE_ENV === 'production' ? '/app/' : '',
   routes: [
     {
       path: '/',
-      redirect: '/dashboard',
-    },
-    {
-      path: '/dashboard',
       component: Dashboard,
       children: [
-        {path: '', component: () => import('./views/dashboard/Home.vue')},
+        {path: 'home', component: () => import('./views/dashboard/Home.vue')},
         {path: 'debug', component: () => import('./views/dashboard/Debug.vue')},
         {path: 'about', component: () => import('./views/dashboard/About.vue')},
         {path: 'bots', component: () => import('./views/dashboard/bots/BotIndex.vue')},

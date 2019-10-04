@@ -23,7 +23,7 @@
 
   @Component({})
   export default class Login extends Vue {
-    public authUrl: string = (process.env.NODE_ENV === 'prod' ?
+    public authUrl: string = (process.env.NODE_ENV === 'production' ?
       'https://api.canal.asherfoster.com' :
       'http://localhost:4080') + '/oauth/discord/start';
   }
