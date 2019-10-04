@@ -23,9 +23,20 @@
 
   @Component({})
   export default class Login extends Vue {
-    public authUrl: string = (process.env.NODE_ENV === 'production' ?
-      'https://api.canal.asherfoster.com' :
-      'http://localhost:4080') + '/oauth/discord/start';
+    public get authUrl(): string {
+      let host;
+      switch(process.env.NODE_ENV) {
+        case 'production':
+          host = 'https://api.canal.asherfoster.com';
+          break;
+        case 'beta':
+          host = 'https://api.beta.canal.asherfoster.com';
+          break;
+        default:
+          host =  'http://localhost:4080';
+      }
+      return host + '/oauth/discord/start';
+    }
   }
 </script>
 

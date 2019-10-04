@@ -1,6 +1,8 @@
 language: node_js
 node_js: '10'
-script: npm run test && npm run build
+script: npm run test && sh build.sh
+
+
 deploy:
 - provider: gcs
   edge: true
@@ -19,7 +21,7 @@ deploy:
   on:
     branch: develop
 
-dd:
+before_deploy:
 - openssl aes-256-cbc -K $encrypted_ad9a1014c2de_key -iv $encrypted_ad9a1014c2de_iv
   -in gcs-dev.json.enc -out secrets/gcs-dev.json -d
 - openssl aes-256-cbc -K $encrypted_ad9a1014c2de_key -iv $encrypted_ad9a1014c2de_iv
