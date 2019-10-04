@@ -7,7 +7,7 @@ deploy:
 - provider: gcs
   edge: true
   bucket: "$BUCKET_PROD_NAME"
-  key_file: "secrets/gcs-prod.json"
+  key_file: "gcs-prod.json"
   local_dir: dist
   detect_encoding: true
   on:
@@ -15,13 +15,12 @@ deploy:
 - provider: gcs
   edge: true
   bucket: "$BUCKET_DEV_NAME"
-  key_file: "secrets/gcs-dev.json"
+  key_file: "gcs-dev.json"
   local_dir: dist
   detect_encoding: true
   on:
     branch: develop
 
 before_deploy:
-  # OpenSSL changed it's default digest in 1.1 Travis uses 1.0, so uses a different digest?
-  - openssl aes-256-cbc -K $encrypted_ad9a1014c2de_key -iv $encrypted_ad9a1014c2de_iv -in gcs-dev.json.enc -out secrets/gcs-dev.json -d -md sha256
-  - openssl aes-256-cbc -K $encrypted_ad9a1014c2de_key -iv $encrypted_ad9a1014c2de_iv -in gcs-prod.json.enc -out secrets/gcs-prod.json -d -md sha256
+  - openssl aes-256-cbc -K $encrypted_ad9a1014c2de_key -iv $encrypted_ad9a1014c2de_iv -in secrets.tar.enc -out secrets.tar -d
+  - tar xvf secrets.tar
