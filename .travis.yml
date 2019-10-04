@@ -5,7 +5,7 @@ deploy:
 - provider: gcs
   edge: true
   bucket: "$BUCKET_PROD_NAME"
-  key_file: "./secrets/gcs-prod.json"
+  key_file: "secrets/gcs-prod.json"
   local_dir: dist
   detect_encoding: true
   on:
@@ -13,7 +13,7 @@ deploy:
 - provider: gcs
   edge: true
   bucket: "$BUCKET_DEV_NAME"
-  key_file: "./secrets/gcs-dev.json"
+  key_file: "secrets/gcs-dev.json"
   local_dir: dist
   detect_encoding: true
   on:
