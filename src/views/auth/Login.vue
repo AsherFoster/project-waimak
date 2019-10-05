@@ -32,7 +32,7 @@
 
 <style scoped>
   .wrapper {
-    background: url(../../assets/demo-image.jpg) no-repeat center;
+    background: url(../../assets/swirly.png) no-repeat center;
     background-size: cover;
     text-align: center;
   }

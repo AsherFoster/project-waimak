@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Dashboard from './views/dashboard/Dashboard.vue';
 import {apiHost, checkAuthentication} from '@/util';
+import store from './store';
 
 Vue.use(Router);
 
@@ -43,15 +44,26 @@ const router = new Router({
         {path: 'scripts/:id', component: () => import('./views/dashboard/scripts/ScriptDetail.vue')},
         {path: 'settings', component: () => import('./views/dashboard/settings/SettingsView.vue')},
         {path: 'settings/deleteaccount', component: () => import('./views/dashboard/settings/DeleteAccount.vue')},
+        {
+          path: 'users',
+          component: () => import('./views/dashboard/users/UserView.vue'),
+          children: [
+            {path: '', redirect: 'list'},
+            {path: 'list', component: () => import('./views/dashboard/users/UserList.vue')},
+            {path: 'invites', component: () => import('./views/dashboard/users/Invites.vue')}
+          ],
+          async beforeEnter(to, from, next) {
+            if (store.state.auth.user && store.state.auth.user.admin) next();
+            else next('/');
+          }
+        },
         {path: '*', component: () => import('./views/Error404.vue')}
       ],
       async beforeEnter(to, from, next) {
-        console.log('Router guard!');
         if (await checkAuthentication()) {
           next();
         } else {
-          // Please, please don't cause a loop
-          window.location.href = apiHost + '/oauth/discord/start';
+          next('/login');
         }
       }
     },
