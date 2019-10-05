@@ -11,6 +11,7 @@ export interface User {
   name: string;
   avatarUrl: string;
   email: string;
+  admin: boolean;
 }
 export interface AuthenticationState {
   loggedIn: boolean;
@@ -61,10 +62,11 @@ const authentication: Module<AuthenticationState, RootState> = {
         const resp = await apolloClient.query({
           query: gql`query GetInitialUser {
               user {
-                  id
-                  name
-                  avatarUrl
-                  email
+                id
+                name
+                avatarUrl
+                email
+                admin
               }
           }`
         });

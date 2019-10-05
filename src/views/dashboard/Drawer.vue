@@ -74,7 +74,10 @@
             </v-card>
           </v-menu>
           <v-toolbar-title class="ml-2">
-            <span class="subheading">{{user.name}}</span>
+            <span class="subheading">
+              {{user.name}}
+              <AdministratorBadge v-if="user.admin"></AdministratorBadge>
+            </span>
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn icon @click="mini = !mini" v-if="!mini">
@@ -89,7 +92,7 @@
 <script lang="ts">
   import {Component, Vue, Watch} from 'vue-property-decorator';
   import {namespace} from 'vuex-class';
-  import gql from 'graphql-tag';
+  import AdministratorBadge from '@/components/AdministratorBadge.vue';
 
   const auth = namespace('auth');
 
@@ -98,8 +101,13 @@
     name: string;
     email: string;
     avatarUrl: string;
+    admin: boolean;
   }
-  @Component({})
+  @Component({
+    components: {
+      AdministratorBadge
+    }
+  })
   export default class Drawer extends Vue {
     public mini: boolean = localStorage.getItem('mini-drawer') === '1';
     @auth.State('user') public user!: User | null;
@@ -119,21 +127,28 @@
         icon: 'description',
         name: 'Scripts',
         path: '/scripts'
-      },
-      {
-        icon: 'account_circle',
-        name: 'Users',
-        path: '/users'
-      },
-      {
-        icon: 'bug_report',
-        name: 'Debug',
-        path: '/debug'
       }
     ];
     @Watch('mini')
     public onMiniChange(v: boolean) {
       localStorage.setItem('mini-drawer', (+v).toString());
+    }
+
+    created() {
+      if(this.user && this.user.admin) {
+        this.links = this.links.concat([
+                {
+                  icon: 'account_circle',
+                  name: 'Users',
+                  path: '/users'
+                },
+                {
+                  icon: 'bug_report',
+                  name: 'Debug',
+                  path: '/debug'
+                }
+          ])
+      }
     }
   }
 </script>
