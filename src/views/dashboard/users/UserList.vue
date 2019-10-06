@@ -82,10 +82,10 @@
     export default class UserList extends Vue {
         public users: User[] = [];
 
-        reload() {
+        public reload() {
             this.$apollo.queries.users.refetch();
         }
-        async destroySessions(userId: string) {
+        public async destroySessions(userId: string) {
             await this.$apollo.mutate({
                 mutation: gql`mutation DestroyUserSessions($user: String!) {
     destroyAllSessions(user: $user)
@@ -93,10 +93,10 @@
                 variables: {
                     user: userId
                 }
-            })
+            });
         }
 
-        async setAdmin(userId: string, to: boolean) {
+        public async setAdmin(userId: string, to: boolean) {
             await this.$apollo.mutate({
                 mutation: gql`mutation SetUserAdmin($user: String!, $value: Boolean) {
   setUserFlag(user: $user, name: "isAdmin", value: $value)
@@ -105,10 +105,10 @@
                     user: userId,
                     value: to ? true : null
                 }
-            })
+            });
         }
 
-        deleteUser(userId: string) {
+        public deleteUser(userId: string) {
             return false; // TODO implement popups, etc
         }
     }

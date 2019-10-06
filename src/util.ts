@@ -34,9 +34,9 @@ export function getApolloErrorCode(e: any): string | void {
     e.networkError.result.errors[0].extensions.code;
 }
 
-export async function checkAuthentication() {
+export async function checkAuthentication(): Promise<boolean> {
   const token = localStorage.getItem('auth_token');
-  if (!token) return;
+  if (!token) return false;
   try {
     const resp = await apolloClient.query({
       query: gql`query CheckAuthentication {
@@ -48,6 +48,7 @@ export async function checkAuthentication() {
     return true;
   } catch (e) {
     if (getApolloErrorCode(e) === 'UNAUTHENTICATED') {
+      localStorage.removeItem('auth_token');
       return false;
     } else {
       // TODO this area needs error logging

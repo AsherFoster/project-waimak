@@ -134,8 +134,8 @@
       localStorage.setItem('mini-drawer', (+v).toString());
     }
 
-    created() {
-      if(this.user && this.user.admin) {
+    public created() {
+      if (this.user && this.user.admin) {
         this.links = this.links.concat([
                 {
                   icon: 'account_circle',
@@ -147,7 +147,7 @@
                   name: 'Debug',
                   path: '/debug'
                 }
-          ])
+          ]);
       }
     }
   }

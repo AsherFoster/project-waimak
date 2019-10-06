@@ -24,13 +24,20 @@
   import {Component, Vue} from 'vue-property-decorator';
   import {State} from 'vuex-class';
   import {User} from '@/store/authentication';
+  import gql from 'graphql-tag';
 
   @Component({})
   export default class DeleteAccount extends Vue {
     public accepted: boolean = false;
     public enteredEmail: string = '';
     @State('user', {namespace: 'auth'}) public account!: User;
-    public doDeleteAccount() {}
+    public doDeleteAccount() {
+      this.$apollo.mutate({
+        mutation: gql`mutation DeleteAccount {
+  deleteUser
+}`
+      });
+    }
   }
 </script>
 
