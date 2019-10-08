@@ -18,7 +18,22 @@
     <v-card-text>
       <p>Platform: {{bot.platform}}</p>
       <p>Created: {{bot.created | momentnow}}</p>
-      <p>API Key: {{bot.apiKey}}<CopyText :value="bot.apiKey" /></p>
+      <v-layout>
+        <v-text-field
+                style="max-width: 400px;"
+                :value="bot.apiKey"
+                readonly
+                label="API Key"
+                :append-icon="keyShown ? 'visibility_off' : 'visibility'"
+                :type="keyShown ? 'text' : 'password'"
+                @click:append="keyShown = !keyShown"
+        ></v-text-field>
+        <CopyText :value="bot.apiKey" />
+      </v-layout>
+      <v-layout>
+        <v-text-field style="max-width: 400px;" :value="inviteLink" readonly label="Invite Link"></v-text-field>
+        <CopyText :value="inviteLink" />
+      </v-layout>
     </v-card-text>
   </v-card>
 </template>
@@ -64,6 +79,12 @@
   })
   export default class BotDetails extends Vue {
     public bot: BotQueryResult | null = null;
+    public keyShown: boolean = false;
+
+    public get inviteLink(): string {
+      if (!this.bot) return '';
+      return `https://discordapp.com/oauth2/authorize?client_id=${this.bot.id}&scope=bot`
+    }
   }
 </script>
 
