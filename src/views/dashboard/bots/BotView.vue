@@ -1,12 +1,12 @@
 <template>
   <div class="fill-height">
-    <v-layout fill-height v-if="bot && bots">
+    <v-layout fill-height v-if="bots">
       <v-navigation-drawer permanent class="fill-height">
         <v-select
                 :items="bots.nodes"
                 item-value="id"
                 filled
-                :value="bot.id"
+                :value="botId"
                 @input="botSelectChange"
                 class="bot-select"
                 hide-details
@@ -80,24 +80,7 @@
   @Component({
     components: {StatusIcon},
     apollo: {
-      bot() {
-        return {
-          query: gql`query GetBotForOverview($id: String!) {
-  bot(id: $id) {
-    id
-    name
-    avatarUrl
-    connection {
-        state
-    }
-  }
-}`,
-          variables() {
-            return {id: this.$route.params.id};
-          }
-        };
-      },
-      bots: gql`query ListBotOverview {
+      bots: gql`query GetBotsForList {
   bots {
     nodes {
       id
@@ -109,7 +92,9 @@
     }
   })
   export default class BotView extends Vue {
-    public bot: BotQueryResult | null = null;
+    public get botId() {
+      return this.$route.params.id;
+    }
     public bots: BotsQuery | null = null;
     public botSelectChange(v: string) {
       this.$router.push({params: {id: v}});

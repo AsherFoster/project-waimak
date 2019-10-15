@@ -1,5 +1,9 @@
 <template>
   <div>
+    <v-banner icon="warning" class="mb-4" elevation="4">
+      Note: The permissions system is not implemented on the Gateway. You can edit permissions here,
+      but they may be lost without warning
+    </v-banner>
     <v-expansion-panels v-if="bot && bot.permissions.length">
       <v-expansion-panel
               v-for="perm in bot.permissions"
