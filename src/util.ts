@@ -1,14 +1,13 @@
-import {ApolloError} from 'apollo-client';
 import {apolloClient} from '@/plugins/apollo';
 import gql from 'graphql-tag';
 
 let host;
 switch (process.env.NODE_ENV) {
   case 'production':
-    host = 'https://api.canal.asherfoster.com';
+    host = 'https://api.canal.nz';
     break;
   case 'beta':
-    host = 'https://api.beta.canal.asherfoster.com';
+    host = 'https://api.beta.canal.nz';
     break;
   default:
     host =  'http://localhost:4080';
