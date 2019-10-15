@@ -46,7 +46,7 @@ createInviteKey(lifespan: $lifespan)
             })).data.createInviteKey;
         }
         public get link() {
-            return 'https://canal.asherfoster.com/invite?' + this.key;
+            return 'https://canal.nz/invite?' + this.key;
         }
     }
 </script>

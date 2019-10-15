@@ -13,7 +13,7 @@
         </v-btn>
         <v-progress-circular v-else indeterminate></v-progress-circular>
       </v-layout>
-      <v-btn class="corner" icon href="//canal.asherfoster.com">
+      <v-btn class="corner" icon href="//canal.nz">
         <v-icon color="grey">info</v-icon>
       </v-btn>
     </v-container>

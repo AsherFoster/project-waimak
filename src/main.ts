@@ -5,6 +5,7 @@ import {sync} from 'vuex-router-sync';
 import '@/plugins/vuex';
 import '@/plugins/register-hooks';
 import '@/plugins/simple-filters';
+import '@/plugins/sentry';
 import vuetify from '@/plugins/vuetify';
 import apolloProvider from '@/plugins/apollo';
 

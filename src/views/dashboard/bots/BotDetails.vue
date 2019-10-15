@@ -83,7 +83,7 @@
 
     public get inviteLink(): string {
       if (!this.bot) return '';
-      return `https://discordapp.com/oauth2/authorize?client_id=${this.bot.id}&scope=bot`
+      return `https://discordapp.com/oauth2/authorize?client_id=${this.bot.id}&scope=bot`;
     }
   }
 </script>
