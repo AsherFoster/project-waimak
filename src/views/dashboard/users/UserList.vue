@@ -103,7 +103,7 @@
 }`,
                 variables: {
                     user: userId,
-                    value: to ? true : null
+                    value: to
                 }
             });
         }
