@@ -34,7 +34,7 @@
     <v-banner :value="bodyDirty" single-line class="unsaved-banner">
       You have unsaved changes
       <template v-slot:actions>
-        <v-btn :disabled="saving" @click="saveAndRestart" text>Save and restart</v-btn>
+        <v-btn :disabled="saving" @click="saveScript(true)" text>Save and restart</v-btn>
         <v-btn :disabled="saving" @click="saveScript">Save</v-btn>
       </template>
     </v-banner>
@@ -110,28 +110,41 @@
       this.script.name = newScript.data.updateScript.name;
       this.scriptName = this.script.name; // Just in case the server modifies it
     }, 400);
-    public deployToBot(id: string) {
+    public deployToBot(id: string, isNew: boolean) {
       if (!this.script) return;
 
-      this.$apollo.mutate({
-        mutation: gql`mutation DeployScriptToBot($script: String!, $bot: String!) {
-  addScriptToBot(script: $script, bot: $bot) {
-    bot {
-      id
+      if (isNew) {
+        this.$apollo.mutate({
+          mutation: gql`mutation DeployScriptToBot($script: String!, $bot: String!) {
+    addScriptToBot(script: $script, bot: $bot) {
+      bot {
+        id
+      }
     }
-  }
-}`,
-        variables: {
-          script: this.script.id,
-          bot: id
-        }
-      });
+  }`,
+          variables: {
+            script: this.script.id,
+            bot: id
+          }
+        });
+      } else {
+        this.$apollo.mutate({
+          mutation: gql`mutation RestartScriptOnBot($script: String!, $bot: String!) {
+    restartScriptOnBot(script: $script, bot: $bot) {
+      bot {
+        id
+      }
     }
-    public async saveAndRestart(): Promise<void> {
-      // TODO implement restart
-      await this.saveScript();
+  }`,
+          variables: {
+            script: this.script.id,
+            bot: id
+          }
+        });
+      }
     }
-    public async saveScript(): Promise<void> {
+    public async saveScript(restart: boolean = false): Promise<void> {
+      if (!this.script) return;
       this.saving = true;
       await this.$apollo.mutate({
         mutation: gql`mutation UpdateScript($script: ScriptUpdateInput!) {
@@ -146,6 +159,20 @@
           }
         }
       });
+      if (restart) {
+        await this.$apollo.mutate({
+          mutation: gql`mutation RestartScriptEverywhere($script: String!) {
+    restartScriptEverywhere(script: $script) {
+      bot {
+        id
+      }
+    }
+  }`,
+          variables: {
+            script: this.script.id
+          }
+        });
+      }
       this.bodyDirty = false;
       this.saving = false;
     }

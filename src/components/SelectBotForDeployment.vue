@@ -6,7 +6,7 @@
         <v-list-item
                 v-for="bot in bots.nodes"
                 :key="bot.id"
-                @click="select(bot.id)"
+                @click="select(bot)"
                 :two-line="!!getDeployWarnings(bot)">
           <v-list-item-avatar>
             <img :src="bot.avatarUrl">
@@ -91,8 +91,8 @@
     @Emit('input') public setVisibility(val: boolean): boolean {
       return val;
     }
-    public select(id: string) {
-      this.$emit('selected', id);
+    public select(bot: Bot) {
+      this.$emit('selected', bot.id, !bot.script);
       this.setVisibility(false);
     }
     public getDeployWarnings(bot: Bot): string | null {

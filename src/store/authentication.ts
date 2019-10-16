@@ -1,10 +1,9 @@
 import {Module, GetterTree, ActionContext, ActionTree, MutationTree} from 'vuex';
-import router from '@/router';
-import {RootState} from './index';
-
-import {apolloClient} from '@/plugins/apollo';
+import * as Sentry from '@sentry/browser';
 import gql from 'graphql-tag';
+import {apolloClient} from '@/plugins/apollo';
 import {getApolloErrorCode} from '@/util';
+import {RootState} from './index';
 
 export interface User {
   id: string;
@@ -39,6 +38,7 @@ const authentication: Module<AuthenticationState, RootState> = {
   } as AuthenticationState,
   mutations: {
     saveUser(state, user: User) {
+      Sentry.setUser({id: user.id, email: user.email});
       state.loggedIn = true;
       state.user = user;
     },
