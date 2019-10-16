@@ -1,12 +1,11 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import * as Sentry from '@sentry/browser';
 import Dashboard from './views/dashboard/Dashboard.vue';
-import {apiHost, checkAuthentication} from '@/util';
+import {checkAuthentication} from '@/util';
 import store from './store';
 
 Vue.use(Router);
-
-const flatToolbar = true;
 
 const router = new Router({
   mode: 'history',
@@ -19,6 +18,10 @@ const router = new Router({
     {
       path: '/auth/callback',
       component: () => import('./views/auth/Callback.vue')
+    },
+    {
+      path: '/error',
+      component: () => import('./views/Error.vue')
     },
     {
       path: '/',
@@ -60,18 +63,28 @@ const router = new Router({
         {path: '*', component: () => import('./views/Error404.vue')}
       ],
       async beforeEnter(to, from, next) {
-        if (await checkAuthentication()) {
-          next();
-        } else {
-          next('/login');
+        try {
+          if (await checkAuthentication()) {
+            next();
+          } else {
+            next('/login');
+          }
+        } catch (e) {
+          next(e);
         }
       }
     },
+    // Stuff won't be matched below here, dashboard's "/" captures everything
     {
       path: '*',
       component: () => import('./views/Error404.vue')
     }
   ],
+});
+
+router.onError((e: Error) => {
+  Sentry.captureException(e);
+  router.push('/error');
 });
 
 export default router;
