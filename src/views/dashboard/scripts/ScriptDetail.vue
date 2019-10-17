@@ -34,8 +34,8 @@
     <v-banner :value="bodyDirty" single-line class="unsaved-banner">
       You have unsaved changes
       <template v-slot:actions>
-        <v-btn :disabled="saving" @click="saveScript(true)" text>Save and restart</v-btn>
-        <v-btn :disabled="saving" @click="saveScript">Save</v-btn>
+        <v-btn :disabled="saving" @click="() => saveScript(true)" text>Save and restart</v-btn>
+        <v-btn :disabled="saving" @click="() => saveScript()">Save</v-btn>
       </template>
     </v-banner>
     <SelectBotForDeployment
