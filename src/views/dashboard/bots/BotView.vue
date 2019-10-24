@@ -60,14 +60,6 @@
   import gql from 'graphql-tag';
   import {ConnectionState} from '@/graphql/schema-types';
 
-  interface BotQueryResult {
-    id: string;
-    name: string;
-    avatarUrl: string;
-    connection: {
-      state: ConnectionState;
-    } | null;
-  }
   interface BotsQuery {
     nodes: BotOverview[];
   }

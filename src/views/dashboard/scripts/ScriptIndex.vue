@@ -18,6 +18,8 @@
             :headers="tableHeaders"
             :items="searchScripts"
             hide-default-footer
+            must-sort
+            disable-pagination
             item-key="id"
     >
       <template v-slot:item="{item}">
