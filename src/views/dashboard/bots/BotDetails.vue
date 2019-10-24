@@ -51,6 +51,10 @@
     avatarUrl?: string;
     platform: string;
     created: Date;
+    connection?: {
+      state: string;
+      created: Date;
+    };
   }
 
   @Component({
@@ -66,6 +70,10 @@
     avatarUrl
     platform
     created
+    connection {
+        state
+        created
+    }
   }
 }`,
           variables() {

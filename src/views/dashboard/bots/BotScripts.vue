@@ -20,7 +20,10 @@
             item-key="script.id"
     >
       <template v-slot:item.started="{ item }">
-        {{item.started | momentnow}}
+        {{item.lastStarted | cMomentNow}}
+      </template>
+      <template v-slot:item.state="{ item }">
+        {{item.state | cScriptState}}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-layout justify-end>
@@ -72,6 +75,7 @@
       name: string;
     };
     lastStarted: string;
+    state: string;
   }
   interface BotQuery {
     id: string;
@@ -94,6 +98,7 @@
             name
           }
           lastStarted
+          state
         }
     }
   }
@@ -117,6 +122,10 @@
       {
         text: 'Started',
         value: 'started'
+      },
+      {
+        text: 'State',
+        value: 'state'
       },
       {
         text: '',
