@@ -7,6 +7,7 @@
       <v-hover>
         <template slot-scope="{ hover }">
           <v-text-field
+                  :readonly="savingName"
                   solo
                   :flat="!hover"
                   hide-details
@@ -87,11 +88,13 @@
     public selectingBotForDeploy: boolean = false; // If selection dialog is open
     public bodyDirty: boolean = false; // If the code has been modified, and should be savable
     public saving: boolean = false;
+    public savingName: boolean = false;
     public scriptName: string = '';
 
     public debouncedTitleChange = debounce(async (name: string) => {
       // Don't save if not loaded, if it's invalid, or it hasn't changed
       if (!this.script || !(this.script as Script).name || this.script.name === name) return;
+      this.savingName = true;
 
       const newScript = await this.$apollo.mutate({
         mutation: gql`mutation UpdateScriptName($script: ScriptUpdateInput!) {
@@ -109,6 +112,7 @@
       }) as any;
       this.script.name = newScript.data.updateScript.name;
       this.scriptName = this.script.name; // Just in case the server modifies it
+      this.savingName = false;
     }, 500);
     public deployToBot(id: string, isNew: boolean) {
       if (!this.script) return;
