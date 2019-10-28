@@ -109,7 +109,7 @@
       }) as any;
       this.script.name = newScript.data.updateScript.name;
       this.scriptName = this.script.name; // Just in case the server modifies it
-    }, 400);
+    }, 500);
     public deployToBot(id: string, isNew: boolean) {
       if (!this.script) return;
 
@@ -149,6 +149,7 @@
       await this.$apollo.mutate({
         mutation: gql`mutation UpdateScript($script: ScriptUpdateInput!) {
   updateScript(script: $script) {
+    id
     body
   }
 }`,

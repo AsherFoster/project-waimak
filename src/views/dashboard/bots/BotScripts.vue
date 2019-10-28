@@ -11,7 +11,7 @@
       </v-btn>
     </v-toolbar>
     <v-data-table
-            v-if="bot.scripts.nodes.length"
+            v-if="bot && bot.scripts.nodes.length"
             :headers="tableHeaders"
             :items="bot.scripts.nodes"
             show-select
@@ -60,7 +60,8 @@
       </template>
     </v-data-table>
     <v-layout justify-center v-else my-4>
-      <h2 class="headline">No scripts running</h2>
+      <h2 class="headline" v-if="bot && bot.scripts">No scripts running</h2>
+      <h2 class="headline" v-else>Failed to load running scripts :(</h2>
     </v-layout>
   </div>
 </template>
