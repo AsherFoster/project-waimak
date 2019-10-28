@@ -9,16 +9,34 @@
       </h2>
       <StatusIcon :connection="bot.connection"></StatusIcon>
       <v-spacer></v-spacer>
-      <div>
-        <v-btn icon color="error">
-          <v-icon>delete</v-icon>
-        </v-btn>
-      </div>
+      <v-menu offset-y>
+        <template v-slot:activator="{ on }">
+          <v-btn icon color="error" v-on="on">
+            <v-icon>delete</v-icon>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-list>
+            <v-list-item @click="">
+              <v-list-item-icon>
+                <v-icon>cancel</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Cancel</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="deleteBot">
+              <v-list-item-icon>
+                <v-icon>delete</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Confirm</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-menu>
     </v-layout>
     <v-card-text>
       <p>Platform: {{bot.platform}}</p>
       <p>Created: {{bot.created | momentnow}}</p>
-      <v-layout>
+      <v-layout align-center>
         <v-text-field
                 style="max-width: 400px;"
                 :value="bot.apiKey"
@@ -30,7 +48,7 @@
         ></v-text-field>
         <CopyText :value="bot.apiKey" />
       </v-layout>
-      <v-layout>
+      <v-layout align-center>
         <v-text-field style="max-width: 400px;" :value="inviteLink" readonly label="Invite Link"></v-text-field>
         <CopyText :value="inviteLink" />
       </v-layout>
@@ -92,6 +110,17 @@
     public get inviteLink(): string {
       if (!this.bot) return '';
       return `https://discordapp.com/oauth2/authorize?client_id=${this.bot.id}&scope=bot`;
+    }
+    public async deleteBot(): Promise<void> {
+      await this.$apollo.mutate({
+        mutation: gql`mutation DeleteBot($id: String!) {
+deleteBot(bot: $id)
+}`,
+        variables: {
+          id: this.bot && this.bot.id
+        }
+      });
+      this.$router.push('/bots');
     }
   }
 </script>
