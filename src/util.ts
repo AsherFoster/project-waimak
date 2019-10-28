@@ -3,20 +3,6 @@ import gql from 'graphql-tag';
 import * as Sentry from '@sentry/browser';
 import {Severity} from '@sentry/browser';
 
-let host;
-switch (process.env.NODE_ENV) {
-  case 'production':
-    host = 'https://api.canal.nz';
-    break;
-  case 'beta':
-    host = 'https://api.beta.canal.nz';
-    break;
-  default:
-    host =  'http://localhost:4080';
-}
-
-export const apiHost = host;
-
 export function debounce(func: (...args: any[]) => any, wait: number) {
   let timeout: NodeJS.Timer;
   return function debounced(...args: any[]) {
