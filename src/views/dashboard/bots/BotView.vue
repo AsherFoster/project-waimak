@@ -3,6 +3,7 @@
     <v-layout fill-height v-if="bots">
       <v-navigation-drawer permanent class="fill-height">
         <v-select
+                v-if="bots && bots.nodes"
                 :items="bots.nodes"
                 item-value="id"
                 filled
@@ -24,6 +25,7 @@
             <h2 class="title title-cut-text">{{item.name}}</h2>
           </template>
         </v-select>
+        <v-skeleton-loader v-else type="list-item-avatar"></v-skeleton-loader>
         <v-list shaped>
           <v-list-item to="details">
             <v-list-item-title>

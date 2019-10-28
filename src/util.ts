@@ -1,5 +1,7 @@
 import {apolloClient} from '@/plugins/apollo';
 import gql from 'graphql-tag';
+import * as Sentry from '@sentry/browser';
+import {Severity} from '@sentry/browser';
 
 let host;
 switch (process.env.NODE_ENV) {
@@ -46,13 +48,17 @@ export async function checkAuthentication(): Promise<boolean> {
     });
     return true;
   } catch (e) {
-    if (getApolloErrorCode(e) === 'UNAUTHENTICATED') {
+    const code = getApolloErrorCode(e);
+    if (code === 'UNAUTHENTICATED') {
       localStorage.removeItem('auth_token');
       return false;
     } else {
-      // TODO this area needs error logging
-      // tslint:disable-next-line:no-console
-      console.error(e);
+      Sentry.addBreadcrumb({
+        level: Severity.Fatal,
+        message: `Failed to check authentication state. Got error: ${code}`,
+        data: {code}
+      });
+      Sentry.captureException(e);
       throw new Error('An unknown error occurred during initialisation!');
     }
   }

@@ -30,6 +30,7 @@
     public errorMap: {[key: string]: string} = {
       'invalid-key': 'Your invite key doesn\'t appear to be valid. It might have expired. You should ask for another one',
       'missing-code': 'Something went wrong while authenticating. Did you cancel it?',
+      'token-invalid': 'Something went wrong while authenticating: the token provided by Discord didn\'t work',
       'invalid-state': 'The request appears to have been tampered with, and has been denied.',
       'internal-malformed': 'Malformed callback. Try logging in again'
     };

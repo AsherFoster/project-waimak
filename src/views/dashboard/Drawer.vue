@@ -39,7 +39,7 @@
       <!-- Bottom icon and toolbar -->
       <v-flex shrink v-if="user">
         <v-toolbar class="bottom-toolbar transparent" flat>
-          <v-menu min-width="200">
+          <v-menu min-width="200" offset-x>
             <template v-slot:activator="{ on }">
               <v-avatar size="38" class="avatar" v-on="on">
                 <img :src="user.avatarUrl">

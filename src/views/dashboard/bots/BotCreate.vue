@@ -131,7 +131,8 @@
             platform: this.platform,
             token: this.token,
           }
-        }
+        },
+        refetchQueries: ['ListBots']
       });
       this.bot = resp.data.createBot;
       this.loading = false;

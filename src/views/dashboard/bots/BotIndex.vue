@@ -85,7 +85,7 @@
   @Component({
     components: {StatusIcon},
     apollo: {
-      bots: gql`query ListAllBots {
+      bots: gql`query ListBots {
   bots {
     nodes {
       id
@@ -105,7 +105,7 @@
   })
   export default class BotIndex extends Vue {
     @Getter('avatarUrl', {namespace: 'auth'}) public avatarUrl!: string;
-    public bots: Bot[] = [];
+    public bots: BotQuery | null = null;
   }
 </script>
 

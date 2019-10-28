@@ -19,6 +19,7 @@
             :items="searchScripts"
             hide-default-footer
             must-sort
+            sort-by="edited"
             disable-pagination
             item-key="id"
     >
@@ -81,7 +82,7 @@
     id: string;
     name: string;
     platform: string;
-    updated: Date;
+    updated?: Date;
     created: Date;
   }
   interface ScriptQuery {
@@ -91,7 +92,7 @@
 
   @Component({
     apollo: {
-      scripts: gql`query GetAllScripts {
+      scripts: gql`query ListScripts {
   scripts {
     totalCount
     nodes {
@@ -114,8 +115,10 @@
         value: 'name'
       },
       {
+        // This is not necessarily ok, because updated can be null. However, vuetify doesn't like sorting multiple props
+        // TODO make sorting more robust
         text: 'Edited',
-        value: 'edited'
+        value: 'updated'
       },
       {
         text: '',
@@ -128,7 +131,8 @@
         mutation: gql`mutation DeleteScript($script: String!) {
   deleteScript(script: $script)
 }`,
-        variables: {script: script.id}
+        variables: {script: script.id},
+        refetchQueries: ['ListScripts']
       });
       const index = (this.scripts as ScriptQuery).nodes.findIndex((s) => s.id === script.id);
       (this.scripts as ScriptQuery).nodes.splice(index, 1);
@@ -138,6 +142,7 @@
         mutation: gql`mutation RestartScript($script: String!) {
   restartScriptEverywhere(script: $script) {
     bot {
+      id
       name
     }
   }
@@ -153,7 +158,8 @@
   createScript {
     id
   }
-}`
+}`,
+        refetchQueries: ['ListScripts']
       });
       this.$router.push('/scripts/' + resp.data.createScript.id);
     }
