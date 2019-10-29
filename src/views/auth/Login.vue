@@ -13,7 +13,7 @@
         </v-btn>
         <v-progress-circular v-else indeterminate></v-progress-circular>
       </v-layout>
-      <v-btn class="corner" icon href="//canal.nz">
+      <v-btn class="corner" icon :href="siteUrl">
         <v-icon color="grey">info</v-icon>
       </v-btn>
     </v-container>
@@ -22,13 +22,15 @@
 
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
-  import {apiHost, checkAuthentication} from '@/util';
+  import {checkAuthentication} from '@/util';
+  import {API_BASE, SITE_BASE} from '@/constants';
 
   @Component({})
   export default class Login extends Vue {
     public authed: boolean | null = null;
+    public siteUrl: string = SITE_BASE;
     public get authUrl(): string {
-      return apiHost + '/oauth/discord/start';
+      return API_BASE + '/oauth/discord/start';
     }
 
     public async created() {

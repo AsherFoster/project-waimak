@@ -10,6 +10,9 @@
         </v-btn>
 <!--        <v-breadcrumbs :items="breadcrumbs"></v-breadcrumbs>-->
         <v-spacer></v-spacer>
+        <a :href="docs">
+          <v-icon>help_outline</v-icon>
+        </a>
       </v-app-bar>
       <v-content class="fill-height">
         <router-view></router-view>
@@ -33,6 +36,7 @@
   import {Component, Vue} from 'vue-property-decorator';
   import Drawer from './Drawer.vue';
   import store from '@/store';
+  import {DOCS_URL} from '@/constants';
 
   @Component({
     components: {Drawer},
@@ -47,6 +51,7 @@
     public ready: boolean = false;
     public error: Error|null = null;
     public breadcrumbs: string[] = [];
+    public docs: string = DOCS_URL;
 
     get loading(): boolean {
       return this.$store.state.loading || this.$apollo.loading;

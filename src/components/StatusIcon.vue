@@ -53,7 +53,7 @@
     }
     get since(): string {
       if (this.connection && this.connection.created) {
-        return ' (' + moment(this.connection.created).fromNow() + ')'
+        return ' (' + moment(this.connection.created).fromNow() + ')';
       } else return '';
     }
     get connected(): boolean {
