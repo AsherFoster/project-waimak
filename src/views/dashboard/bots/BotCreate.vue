@@ -66,7 +66,7 @@
             </v-card-text>
             <v-card-actions>
               <v-flex></v-flex>
-              <v-btn text>Docs</v-btn>
+              <v-btn text :href="docs">Docs</v-btn>
               <v-btn :to="'/bots/' + bot.id">Go to bot</v-btn>
             </v-card-actions>
           </v-card>
@@ -84,6 +84,7 @@
   import {Platform} from '@/graphql/schema-types';
   import gql from 'graphql-tag';
   import CopyText from '@/components/CopyText.vue';
+  import {DOCS_URL} from '@/constants';
 
   interface PlatformMap {
     name: string;
@@ -102,6 +103,7 @@
     components: {CopyText}
   })
   export default class BotCreate extends Vue {
+    public docs: string = DOCS_URL;
     public step: number = 0;
     public loading: boolean = false;
 

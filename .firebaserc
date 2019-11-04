@@ -1,0 +1,23 @@
+{
+  "projects": {
+    "default": "canaldev",
+    "dev": "canaldev",
+    "prod": "canalapp"
+  },
+  "targets": {
+    "canaldev": {
+      "hosting": {
+        "app": [
+          "canaldev-app"
+        ]
+      }
+    },
+    "canalapp": {
+      "hosting": {
+        "app": [
+          "canalapp-app"
+        ]
+      }
+    }
+  }
+}
