@@ -9,7 +9,6 @@ Vue.use(Router);
 
 const router = new Router({
   mode: 'history',
-  base: (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'beta') ? '/app/' : '/',
   routes: [
     {
       path: '/login',
