@@ -84,7 +84,7 @@
   import {Platform} from '@/graphql/schema-types';
   import gql from 'graphql-tag';
   import CopyText from '@/components/CopyText.vue';
-  import {DOCS_URL} from "@/constants";
+  import {DOCS_URL} from '@/constants';
 
   interface PlatformMap {
     name: string;
