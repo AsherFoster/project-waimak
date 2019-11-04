@@ -1,8 +1,8 @@
 {
   "projects": {
     "default": "canaldev",
-    "develop": "canaldev",
-    "master": "canalapp"
+    "dev": "canaldev",
+    "prod": "canalapp"
   },
   "targets": {
     "canaldev": {

@@ -2,15 +2,15 @@ language: node_js
 node_js: '10'
 script: npm run test && sh build.sh
 
-before_deploy: firebase use $TRAVIS_BRANCH
-
 deploy:
   - provider: firebase
+    project: prod
     edge: true
     on:
       branch: master
 
   - provider: firebase
+    project: dev
     edge: true
     on:
       branch: develop
