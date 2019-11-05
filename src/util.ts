@@ -45,7 +45,7 @@ export async function checkAuthentication(): Promise<boolean> {
         data: {code}
       });
       Sentry.captureException(e);
-      throw new Error('An unknown error occurred during initialisation!');
+      throw new Error('An unknown error occurred while checking authentication state' + e);
     }
   }
 }
