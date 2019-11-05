@@ -22,7 +22,7 @@
               </v-flex>
               <v-divider class="mx-3" vertical />
               <v-flex md6 v-if="bot.connection">
-                <p class="headline mb-0">{{bot.connection.created | momentnow(true)}}</p>
+                <p class="headline mb-0">{{bot.connection.created | cMomentNow(true)}}</p>
                 <p>uptime</p>
               </v-flex>
               <v-flex md6 v-else>

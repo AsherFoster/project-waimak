@@ -4,17 +4,18 @@
       <v-list v-if="!this.$apollo.loading && bots && bots.nodes.length">
         <v-subheader>Select bot to deploy to:</v-subheader>
         <v-list-item
-                v-for="bot in bots.nodes"
+                v-for="bot in botsWithWarnings"
                 :key="bot.id"
+                :disabled="bot.warnings.blocking"
                 @click="select(bot)"
-                :two-line="!!getDeployWarnings(bot)">
+                :two-line="!!bot.warnings">
           <v-list-item-avatar>
             <img :src="bot.avatarUrl">
           </v-list-item-avatar>
           <v-list-item-content>
             <v-list-item-title>{{bot.name}}</v-list-item-title>
-            <v-list-item-subtitle v-if="getDeployWarnings(bot)">
-              {{getDeployWarnings(bot)}}
+            <v-list-item-subtitle v-if="bot.warnings">
+              {{bot.warnings.text}}
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
@@ -33,7 +34,7 @@
 <script lang="ts">
   import {Component, Emit, Prop, Vue} from 'vue-property-decorator';
   import gql from 'graphql-tag';
-  import {ConnectionState, ScriptState} from '@/graphql/schema-types';
+  import {ClientState, ScriptState} from '@/graphql/schema-types';
 
   interface Bot {
     id: string;
@@ -43,11 +44,15 @@
       state: ScriptState | null
     };
     connection: {
-      state: ConnectionState
+      state: ClientState
     };
   }
   interface BotQuery {
     nodes: Bot[];
+  }
+  interface BotWarnings {
+    blocking: boolean;
+    text: string;
   }
 
   @Component({
@@ -95,14 +100,27 @@
       this.$emit('selected', bot.id, !bot.script);
       this.setVisibility(false);
     }
-    public getDeployWarnings(bot: Bot): string | null {
+    public getDeployWarnings(bot: Bot): BotWarnings {
       const warns = [];
-      if (bot.connection && bot.connection.state !== 'OK') warns.push('Bot may not be safe to deploy to');
-      if (!bot.connection && !bot.script) warns.push('Script will be deployed when bot next connects');
-      if (bot.connection && bot.script) warns.push('Script will be restarted');
-      if (!bot.connection && bot.script) warns.push('Bot is offline, script will not be restarted');
+      if (bot.connection) {
+        const state = bot.connection.state;
+        if (state === 'STARTUP') warns.push({blocking: true, text: 'Cannot deploy to bot in STARTUP'});
+        else if (state === 'ERROR') warns.push({blocking: true, text: 'Bot is ERRORed and is not safe to deploy to'});
+        else if (state !== 'ONLINE') warns.push({blocking: false, text: 'Script will be deployed when bot connects'});
+        if (bot.script) warns.push({blocking: false, text: 'Script will be restarted'});
+      } else {
+        if (!bot.script) warns.push({blocking: false, text: 'Script will be deployed when bot connects'});
+        else warns.push({blocking: true, text: 'Script is linked but bot is offline. This will do nothing'});
+      }
 
-      return warns.length ? warns.join(', ') : null;
+      return {
+        blocking: warns.some((w) => w.blocking),
+        text: warns.map((w) => w.text).join(', ')
+      };
+    }
+    public get botsWithWarnings(): Array<Bot | BotWarnings> {
+      if (!this.bots || !this.bots.nodes) return [];
+      return this.bots.nodes.map((bot) => ({...bot, warnings: this.getDeployWarnings(bot)}));
     }
   }
 </script>

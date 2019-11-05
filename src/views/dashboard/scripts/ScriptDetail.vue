@@ -17,15 +17,21 @@
         </template>
       </v-hover>
       <v-flex></v-flex>
-      <v-btn icon>
-        <v-icon>delete</v-icon>
-      </v-btn>
-      <v-btn icon>
-        <v-icon>settings</v-icon>
-      </v-btn>
-      <v-btn icon @click="selectingBotForDeploy = true">
-        <v-icon>cloud_upload</v-icon>
-      </v-btn>
+      <WithTooltip value="Delete Script (WIP)">
+        <v-btn icon>
+          <v-icon>delete</v-icon>
+        </v-btn>
+      </WithTooltip>
+      <WithTooltip value="Script Settings (WIP)">
+        <v-btn icon>
+          <v-icon>settings</v-icon>
+        </v-btn>
+      </WithTooltip>
+      <WithTooltip value="Deploy to Bot">
+        <v-btn icon @click="selectingBotForDeploy = true">
+          <v-icon>cloud_upload</v-icon>
+        </v-btn>
+      </WithTooltip>
     </v-toolbar>
     <AceEditor
             :value="script ? script.body : ''"
@@ -54,6 +60,7 @@
   import {debounce} from '@/util';
   import SelectBotForDeployment from '@/components/SelectBotForDeployment.vue';
   import AceEditor from '@/components/AceEditor.vue';
+  import WithTooltip from '@/components/WithTooltip.vue';
 
   interface Script {
     id: string;
@@ -62,7 +69,7 @@
   }
 
   @Component({
-    components: {SelectBotForDeployment, AceEditor},
+    components: {WithTooltip, SelectBotForDeployment, AceEditor},
     apollo: {
       script() {
         return {

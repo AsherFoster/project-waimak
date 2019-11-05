@@ -1,3 +1,3 @@
 export type Platform = 'NODEJS';
-export type ConnectionState = 'STARTUP' | 'OK' | 'ERROR';
-export type ScriptState = 'RUNNING' | 'PASSIVE' | 'ERRORED' | 'STOPPED';
+export type ClientState = 'OFFLINE' | 'FAILED' | 'STARTUP' | 'ONLINE' | 'ERROR';
+export type ScriptState = 'RUNNING' | 'PASSIVE' | 'ERROR' | 'STOPPED';

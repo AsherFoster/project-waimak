@@ -35,7 +35,7 @@
     </v-layout>
     <v-card-text>
       <p>Platform: {{bot.platform}}</p>
-      <p>Created: {{bot.created | momentnow}}</p>
+      <p>Created: {{bot.created | cMomentNow}}</p>
       <v-layout align-center>
         <v-text-field
                 style="max-width: 400px;"
