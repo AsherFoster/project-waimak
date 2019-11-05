@@ -29,7 +29,7 @@
       </WithTooltip>
       <WithTooltip value="Deploy to Bot">
         <v-btn icon @click="selectingBotForDeploy = true">
-          <v-icon>cloud_upload</v-icon>
+          <v-icon>play_arrow</v-icon>
         </v-btn>
       </WithTooltip>
     </v-toolbar>
