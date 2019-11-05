@@ -1,9 +1,6 @@
 import * as moment from 'moment';
 import Vue from 'vue';
 
-Vue.filter('momentnow', (v: Date, hideSuffix?: boolean) => {
-  return moment(v).fromNow(hideSuffix);
-});
 Vue.filter('cMomentNow', (v: Date, hideSuffix?: boolean) => {
   return v ? moment(v).fromNow(hideSuffix) : 'never';
 });

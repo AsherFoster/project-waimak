@@ -30,7 +30,7 @@
               {{item.name}}
             </router-link>
           </td>
-          <td>{{item.updated || item.created | momentnow}}</td>
+          <td>{{item.updated || item.created | cMomentNow}}</td>
           <td class="pr-1">
             <v-layout justify-end>
               <v-menu @click.native.stop>

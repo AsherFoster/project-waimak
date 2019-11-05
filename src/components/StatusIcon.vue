@@ -12,14 +12,14 @@
 
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
-  import {ConnectionState} from '@/graphql/schema-types';
+  import {ClientState} from '@/graphql/schema-types';
   import moment from 'moment';
 
   interface Dict {
     [propName: string]: string;
   }
   interface BotConnection {
-    state: ConnectionState;
+    state: ClientState;
     created?: Date;
   }
 

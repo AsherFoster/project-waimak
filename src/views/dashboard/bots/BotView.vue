@@ -60,7 +60,7 @@
   import {Component, Vue} from 'vue-property-decorator';
   import StatusIcon from '@/components/StatusIcon.vue';
   import gql from 'graphql-tag';
-  import {ConnectionState} from '@/graphql/schema-types';
+  import {ClientState} from '@/graphql/schema-types';
 
   interface BotsQuery {
     nodes: BotOverview[];

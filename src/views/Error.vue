@@ -15,7 +15,7 @@
   @Component({})
   export default class Error extends Vue {
     public reload() {
-      window.location.href = '/app';
+      window.location.href = '/';
     }
   }
 </script>
