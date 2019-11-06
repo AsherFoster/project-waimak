@@ -83,7 +83,6 @@ const router = new Router({
 
 router.onError((e: Error) => {
   Sentry.captureException(e);
-  console.error('Router error occurred', e);
   router.push('/error');
 });
 

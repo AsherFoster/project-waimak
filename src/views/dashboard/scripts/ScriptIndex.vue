@@ -6,10 +6,11 @@
         <v-text-field
                 v-model="searchInput"
                 class="scripts-search my-4"
-                :label="`Search ${scripts && scripts.nodes.length} scripts`"
+                :label="$apollo.loading ? 'Loading...' : `Search ${scripts && scripts.nodes.length} scripts`"
                 solo
                 append-icon="search"
                 hide-details
+                :readonly="$apollo.loading"
         ></v-text-field>
         <v-flex></v-flex>
         <v-btn icon @click="reload">
