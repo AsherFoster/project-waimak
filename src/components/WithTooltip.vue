@@ -5,7 +5,7 @@
           :top="position === 'top'"
           :bottom="position === 'bottom'">
     <template v-slot:activator="{ on }">
-      <div v-on="on">
+      <div v-on="on" :style="css">
         <slot></slot>
       </div>
     </template>
@@ -19,6 +19,7 @@
   @Component({})
   export default class WithTooltip extends Vue {
     @Prop({required: true}) public value!: string;
+    @Prop({default: ''}) public css!: string;
     @Prop({default: 'bottom'}) public position!: string;
   }
 </script>

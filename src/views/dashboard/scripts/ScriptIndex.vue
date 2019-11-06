@@ -1,18 +1,23 @@
 <template>
-  <div>
-    <v-layout align-center justify-center>
-      <v-text-field
-              v-model="searchInput"
-              class="scripts-search my-4"
-              :label="`Search ${scripts && scripts.nodes.length} scripts`"
-              solo
-              append-icon="search"
-              hide-details
-      ></v-text-field>
-      <v-btn icon @click="reload">
-        <v-icon>refresh</v-icon>
-      </v-btn>
-    </v-layout>
+  <v-layout column fill-height class="wrapper">
+    <v-flex shrink>
+      <v-layout justify-center align-center>
+        <v-flex></v-flex>
+        <v-text-field
+                v-model="searchInput"
+                class="scripts-search my-4"
+                :label="$apollo.loading ? 'Loading...' : `Search ${scripts && scripts.nodes.length} scripts`"
+                solo
+                append-icon="search"
+                hide-details
+                :readonly="$apollo.loading"
+        ></v-text-field>
+        <v-flex></v-flex>
+        <v-btn icon @click="reload">
+          <v-icon>refresh</v-icon>
+        </v-btn>
+      </v-layout>
+    </v-flex>
     <v-data-table
             v-if="searchScripts.length"
             :headers="tableHeaders"
@@ -62,15 +67,15 @@
       </template>
     </v-data-table>
     <v-layout v-else align-center justify-center py-6>
-      <div v-if="$apollo.loading">Loading</div>
-      <div v-else-if="searchInput && !searchScripts.length">No scripts match that search</div>
-      <div v-else-if="scripts && !scripts.nodes.length">You don't have any scripts</div>
-      <div v-else>Something went wrong!</div>
-    </v-layout>
+        <div v-if="$apollo.loading">Loading</div>
+        <div v-else-if="searchInput && !searchScripts.length">No scripts match that search</div>
+        <div v-else-if="scripts && !scripts.nodes.length">You don't have any scripts</div>
+        <div v-else>Something went wrong!</div>
+      </v-layout>
     <v-btn fab @click="createScript" fixed bottom right>
       <v-icon>add</v-icon>
     </v-btn>
-  </div>
+  </v-layout>
 </template>
 
 <script lang="ts">
@@ -175,6 +180,9 @@
 </script>
 
 <style scoped>
+  .wrapper {
+    background: #424242;
+  }
   .scripts-search {
     max-width: 600px;
   }

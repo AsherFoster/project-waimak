@@ -6,9 +6,7 @@
   >
     <v-layout column fill-height>
       <v-flex>
-        <v-toolbar flat class="transparent" v-if="!mini">
-          <v-toolbar-title>Canal</v-toolbar-title>
-        </v-toolbar>
+        <img :src="staticBase + (mini ? '/img/icon.svg' : '/img/lockup.svg')" alt="Canal" :class="mini ? 'logo logo-mini' : 'logo'">
         <v-list :class="mini || 'pt-0'" nav>
           <v-tooltip v-for="link in links" :key="link.name" right :disabled="!mini">
             <template v-slot:activator="{ on }">
@@ -46,7 +44,7 @@
               </v-avatar>
             </template>
             <v-card>
-              <div class="options-user">
+              <div class="options-user" @click.stop>
                 <p class="subheading">{{user.name}}</p>
                 <p class="caption">{{user.email}}</p>
               </div>
@@ -93,6 +91,7 @@
   import {Component, Vue, Watch} from 'vue-property-decorator';
   import {namespace} from 'vuex-class';
   import AdministratorBadge from '@/components/AdministratorBadge.vue';
+  import {STATIC_BASE} from '@/constants';
 
   const auth = namespace('auth');
 
@@ -109,6 +108,7 @@
     }
   })
   export default class Drawer extends Vue {
+    public readonly staticBase: string = STATIC_BASE;
     public mini: boolean = localStorage.getItem('mini-drawer') === '1';
     @auth.State('user') public user!: User | null;
     @auth.Action('logout') public logout!: () => void;
@@ -154,6 +154,14 @@
 </script>
 
 <style scoped>
+  .logo {
+    max-height: 60px;
+    margin: 6px 0;
+    transition: margin-left 0.2s;
+  }
+  .logo-mini {
+    margin-left: 10px;
+  }
   .transparent {
     background: transparent;
   }
