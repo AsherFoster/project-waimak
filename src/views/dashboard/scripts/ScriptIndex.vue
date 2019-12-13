@@ -2,7 +2,7 @@
   <v-layout column fill-height class="wrapper">
     <v-flex shrink>
       <v-layout justify-center align-center>
-        <v-flex></v-flex>
+        <v-flex />
         <v-text-field
                 v-model="searchInput"
                 class="scripts-search my-4"
@@ -11,8 +11,8 @@
                 append-icon="search"
                 hide-details
                 :readonly="$apollo.loading"
-        ></v-text-field>
-        <v-flex></v-flex>
+        />
+        <v-flex />
         <v-btn icon @click="reload">
           <v-icon>refresh</v-icon>
         </v-btn>
