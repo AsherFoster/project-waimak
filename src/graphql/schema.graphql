@@ -125,7 +125,12 @@ type Workspace {
     resourceOwner: User!
     isPersonal: Boolean
     users: [WorkspaceAccess]
-    modules: [Module]!
+    modules: Modules!
+}
+
+type Workspaces {
+    totalCount: Int!
+    nodes: [Workspace]!
 }
 
 type WorkspaceAccess {
@@ -158,7 +163,7 @@ type Module {
 }
 type Modules {
     totalCount: Int!
-    nodes: [Module!]!
+    nodes: [Module]!
 }
 input ModuleCreateInput {
     name: String
@@ -190,7 +195,7 @@ type Query {
     bots(first: Int = 10, after: String): Bots!
     bot(id: String!): Bot
 
-    workspaces: [Workspace]!
+    workspaces: Workspaces
     workspace(id: String!): Workspace
 
     module(id: String!): Module

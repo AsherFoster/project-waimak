@@ -1,17 +1,23 @@
 <template>
     <v-tooltip top>
         <template v-slot:activator="{ on }">
-            <v-icon class="badge" v-on="on">security</v-icon>
+            <v-icon :style="{opacity}" :size="size" v-on="on">security</v-icon>
         </template>
         <span>Administrator</span>
     </v-tooltip>
 </template>
 
-<script>
-    import {Component, Vue} from 'vue-property-decorator';
+<script lang="ts">
+  import {Component, Prop, Vue} from 'vue-property-decorator';
 
-    @Component({})
-    export default class AdministratorBadge extends Vue {}
+  @Component({})
+  export default class AdministratorBadge extends Vue {
+    @Prop({default: 16})
+    public size!: number;
+
+    @Prop({default: 1})
+    public opacity!: number;
+  }
 </script>
 
 <style scoped>

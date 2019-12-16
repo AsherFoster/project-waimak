@@ -3,10 +3,11 @@
           app
           :mini-variant="mini"
           mobile-break-point="600"
+          :class="mini && 'mini'"
   >
     <v-layout column fill-height>
       <v-flex>
-        <img :src="staticBase + (mini ? '/img/icon.svg' : '/img/lockup.svg')" alt="Canal" :class="mini ? 'logo logo-mini' : 'logo'">
+        <img :src="staticBase + (mini ? '/img/icon.svg' : '/img/lockup.svg')" alt="Canal" class="logo">
         <v-list :class="mini || 'pt-0'" nav>
           <v-tooltip v-for="link in links" :key="link.name" right :disabled="!mini">
             <template v-slot:activator="{ on }">
@@ -39,9 +40,14 @@
         <v-toolbar class="bottom-toolbar transparent" flat>
           <v-menu min-width="200" offset-x>
             <template v-slot:activator="{ on }">
-              <v-avatar size="38" class="avatar" v-on="on">
-                <img :src="user.avatarUrl">
-              </v-avatar>
+              <v-badge overlap :value="user.admin">
+                <template v-slot:badge>
+                  <AdministratorBadge></AdministratorBadge>
+                </template>
+                <v-avatar size="38" class="avatar" v-on="on">
+                  <img :src="user.avatarUrl" />
+                </v-avatar>
+              </v-badge>
             </template>
             <v-card>
               <div class="options-user" @click.stop>
@@ -74,7 +80,6 @@
           <v-toolbar-title class="ml-2">
             <span class="subheading">
               {{user.name}}
-              <AdministratorBadge v-if="user.admin"></AdministratorBadge>
             </span>
           </v-toolbar-title>
           <v-spacer></v-spacer>
@@ -155,11 +160,11 @@
 
 <style scoped>
   .logo {
-    max-height: 60px;
     margin: 6px 0;
     transition: margin-left 0.2s;
+    max-height: 60px;
   }
-  .logo-mini {
+  .mini .logo {
     margin-left: 10px;
   }
   .transparent {

@@ -1,12 +1,25 @@
 <template>
   <div class="fill-height pa-6">
-    <v-banner icon="bug_report" class="home-banner mb-4" elevation="4">
-      Hey there! This app is still in beta, and some features may not work as expected. Just as an FYI, most of the data
-      on this homepage is fudged!
-      <template v-slot:actions="{dismiss}">
-        <v-btn text @click="dismiss">Dismiss</v-btn>
-      </template>
-    </v-banner>
+    <div v-if="workspaces && workspaces.nodes">
+      <v-layout row ma-2>
+        <h2 class="headline">Workspaces</h2>
+        <v-flex />
+        <v-btn text>
+          Create New
+          <v-icon right>add</v-icon>
+        </v-btn>
+      </v-layout>
+      <v-divider />
+      <v-layout mt-4>
+        <v-flex xs12 sm6 md3 v-for="workspace in workspaces.nodes" :key="workspace.id">
+          <v-card>
+            <v-card-title>
+              {{workspace.name}}
+            </v-card-title>
+          </v-card>
+        </v-flex>
+      </v-layout>
+    </div>
     <v-layout row wrap v-if="bots && bots.nodes.length">
       <v-flex xs12 md6 pa-2 v-for="bot in bots.nodes" :key="bot.id">
         <v-card>
@@ -66,34 +79,48 @@
     id: string;
     name: string;
     avatarUrl: string;
-    scripts: {
+    modules: {
       totalCount: number;
     };
-    connection: {
-      state: string;
-    } | null;
   }
-  interface BotsQueryResult {
-    bots: {
-        nodes: Bot[];
-    };
+  interface Workspace {
+    id: string;
+    name: string;
+    modules: {
+      totalCount: number;
+    }
   }
+  interface BotQueryResult {
+    nodes: Bot[];
+  }
+  interface WorkspaceQueryResult {
+    nodes: Workspace[];
+  }
+
   @Component({
     components: {
       StatusIcon
     },
     apollo: {
-      bots: gql`query GetOverviewOfAllBots {
+      bots: gql`query GetBotsForDashboard {
   bots {
     nodes {
       id
       name
       avatarUrl
-      scripts {
+      modules {
         totalCount
       }
-      connection {
-        state
+    }
+  }
+}`,
+      workspaces: gql`query GetWorkspacesForDashboard {
+  workspaces {
+    nodes {
+      id
+      name
+      modules {
+        totalCount
       }
     }
   }
@@ -101,7 +128,8 @@
     }
   })
   export default class Home extends Vue {
-    public bots: BotsQueryResult | null = null;
+    public bots: BotQueryResult | null = null;
+    public workspaces: WorkspaceQueryResult | null = null;
 
     public sparkline = Array.from({length: 24}, this.sparklineValue);
 
