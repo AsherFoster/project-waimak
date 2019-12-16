@@ -88,7 +88,7 @@
     name: string;
     modules: {
       totalCount: number;
-    }
+    };
   }
   interface BotQueryResult {
     nodes: Bot[];

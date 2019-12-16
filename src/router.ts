@@ -44,11 +44,9 @@ const router = new Router({
         },
         {path: 'scripts', component: () => import('./views/dashboard/scripts/ScriptIndex.vue')},
         {path: 'scripts/:id', component: () => import('./views/dashboard/scripts/ScriptDetail.vue')},
-        {path: 'workspaces', component: () => import('./views/dashboard/workspaces/WorkspaceIndex')},
-        {
-          path: 'workspaces/:id/modules',
-
-        },
+        {path: 'workspaces', component: () => import('./views/dashboard/workspaces/WorkspaceIndex.vue')},
+        {path: 'workspaces/:id/modules', component: () => import('./views/dashboard/workspaces/modules/ModuleIndex.vue')},
+        {path: 'workspaces/:workspace/modules/:id', component: () => import('./views/dashboard/workspaces/modules/ModuleDetail.vue')},
         {path: 'workspaces/:id', redirect: 'workspaces/:id/modules'},
         {path: 'settings', component: () => import('./views/dashboard/settings/SettingsView.vue')},
         {path: 'settings/deleteaccount', component: () => import('./views/dashboard/settings/DeleteAccount.vue')},

@@ -10,7 +10,7 @@
             <v-layout>
               <v-text-field
                       :readonly="savingName"
-                      v-model="scriptName"
+                      v-model="moduleName"
                       hide-details
                       solo
                       :flat="!hover"
@@ -59,9 +59,9 @@
       </WithTooltip>
     </v-toolbar>
     <AceEditor
-            :value="script ? script.body : ''"
+            :value="module ? module.body : ''"
             @input="bodyChange"
-            :disabled="saving || $apollo.loading || !script"
+            :disabled="saving || $apollo.loading || !module"
     ></AceEditor>
     <v-banner :value="bodyDirty" single-line class="unsaved-banner">
       You have unsaved changes
@@ -80,7 +80,7 @@
   import AceEditor from '@/components/AceEditor.vue';
   import WithTooltip from '@/components/WithTooltip.vue';
 
-  interface Script {
+  interface Module {
     id: string;
     name: string;
     body: string;
@@ -92,7 +92,7 @@
       script() {
         return {
           query: gql`query GetScriptDetails($id: String!) {
-  script(id: $id) {
+  module(id: $id) {
     id
     name
     body
@@ -101,7 +101,7 @@
           variables: {
             id: this.$route.params.id
           },
-          result(res: {data: {script: Script}}) {
+          result(res: {data: {script: Module}}) {
             this.scriptName = res.data.script.name;
           }
         };
@@ -109,12 +109,11 @@
     }
   })
   export default class ScriptDetail extends Vue {
-    public script: Script | null = null;
-    public selectingBotForDeploy: boolean = false; // If selection dialog is open
+    public module: Module | null = null;
     public bodyDirty: boolean = false; // If the code has been modified, and should be savable
     public saving: boolean = false;
     public savingName: boolean = false;
-    public scriptName: string = '';
+    public moduleName: string = '';
     public nameError: string = '';
 
     public debouncedTitleChange = debounce(() => this.saveTitle(), 500);
@@ -125,126 +124,95 @@
 
     public async saveTitle() {
       // Don't save if not loaded, if it's invalid, or it hasn't changed
-      if (!this.script || this.script.name === this.scriptName) return this.nameError = '';
-      if (!this.scriptName) return this.nameError = 'Name is required';
+      if (!this.module || this.module.name === this.moduleName) return this.nameError = '';
+      if (!this.moduleName) return this.nameError = 'Name is required';
       // this.nameError = '';
       this.savingName = true;
       let newScript;
       let error = '';
       try {
         newScript = await this.$apollo.mutate({
-          mutation: gql`mutation UpdateScriptName($script: ScriptUpdateInput!) {
-    updateScript(script: $script) {
+          mutation: gql`mutation UpdateModuleName($module: ModuleUpdateInput!) {
+    updateModule(module: $module) {
       id
       name
     }
   }`,
           variables: {
-            script: {
-              name: this.scriptName,
-              id: (this.script as Script).id
+            module: {
+              name: this.moduleName,
+              id: (this.module as Module).id
             }
           }
         }) as any;
       } catch (e) {
-        if (e.message.includes('name already exists')) error = 'A script with that name already exists';
-        else if (e.message.includes('Invalid script name')) error = 'Name must be alphanumeric with dashes';
+        if (e.message.includes('name already exists')) error = 'A module with that name already exists';
+        else if (e.message.includes('Invalid module name')) error = 'Name must be alphanumeric with dashes';
         else error = 'Internal Error occurred';
       }
       if (newScript) {
-        this.script.name = newScript.data.updateScript.name;
-        this.scriptName = this.script.name; // Just in case the server modifies it
+        this.module.name = newScript.data.updateScript.name;
+        this.moduleName = this.module.name; // Just in case the server modifies it
       }
       this.nameError = error;
       this.savingName = false;
     }
-    public deployToBot(id: string, isNew: boolean) {
-      if (!this.script) return;
-
-      if (isNew) {
-        this.$apollo.mutate({
-          mutation: gql`mutation DeployScriptToBot($script: String!, $bot: String!) {
-    addScriptToBot(script: $script, bot: $bot) {
+    public deployToBot(id: string) {
+      if (!this.module) return;
+      this.$apollo.mutate({
+        mutation: gql`mutation LinkModuleToBot($module: String!, $bot: String!) {
+    linkModuleToBot(module: $module, bot: $bot) {
       bot {
         id
       }
     }
   }`,
-          variables: {
-            script: this.script.id,
-            bot: id
-          }
-        });
-      } else {
-        this.$apollo.mutate({
-          mutation: gql`mutation RestartScriptOnBot($script: String!, $bot: String!) {
-    restartScriptOnBot(script: $script, bot: $bot) {
-      bot {
-        id
-      }
+        variables: {
+          module: this.module.id,
+          bot: id
+        }
+      });
     }
-  }`,
-          variables: {
-            script: this.script.id,
-            bot: id
-          }
-        });
-      }
-    }
-    public async saveScript(restart: boolean = false): Promise<void> {
-      if (!this.script) return;
+    public async saveScript(): Promise<void> {
+      if (!this.module) return;
       this.saving = true;
       await this.$apollo.mutate({
-        mutation: gql`mutation UpdateScript($script: ScriptUpdateInput!) {
-updateScript(script: $script) {
+        mutation: gql`mutation UpdateScript($module: ModuleUpdateInput!) {
+updateModule(module: $module) {
   id
   body
 }
 }`,
         variables: {
           script: {
-            id: (this.script as Script).id,
-            body: (this.script as Script).body // Cast it, if it's saving, it must exist
+            id: (this.module as Module).id,
+            body: (this.module as Module).body // Cast it, if it's saving, it must exist
           }
         }
       });
 
-      if (restart) {
-        await this.$apollo.mutate({
-          mutation: gql`mutation RestartScriptEverywhere($script: String!) {
-    restartScriptEverywhere(script: $script) {
-      bot {
-        id
-      }
-    }
-  }`,
-          variables: {
-            script: this.script.id
-          }
-        });
-      }
       this.bodyDirty = false;
       this.saving = false;
     }
     public async deleteScript(): Promise<void> {
       await this.$apollo.mutate({
-        mutation: gql`mutation DeleteScript(id: String!) {
+        mutation: gql`mutation DeleteModule($id: String!) {
   deleteModule(id: $id)
 }`,
         variables: {
-          id: (this.script as Script).id
+          id: (this.module as Module).id
         },
         refetchQueries: ['ListScripts']
       });
 
-      this.$router.push('/scripts');
+      this.$router.push('/workspace/' + this.$route.params.workspace);
     }
     public bodyChange(val: string) {
       // Editor is disabled if script doesn't exist, so this will never be true
-      if (!this.script) return;
+      if (!this.module) return;
       // If it's actually modified, i.e hasn't just been set
-      if (val !== this.script.body) {
-        this.script.body = val;
+      if (val !== this.module.body) {
+        this.module.body = val;
         this.bodyDirty = true;
       }
     }

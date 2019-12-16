@@ -2,20 +2,20 @@
   <v-app>
 <!--     Primary View -->
     <div class="fill-height" v-if="ready">
-      <drawer></drawer>
+      <drawer />
       <v-app-bar dense app :flat="$route.meta.flatToolbar">
-        <v-progress-circular v-if="loading" indeterminate size="24" :width="2" color="accent"></v-progress-circular>
+        <v-progress-circular v-if="loading" indeterminate size="24" :width="2" color="accent" />
         <v-btn v-else icon @click="$router.push('/')">
           <v-icon>home</v-icon>
         </v-btn>
 <!--        <v-breadcrumbs :items="breadcrumbs"></v-breadcrumbs>-->
-        <v-spacer></v-spacer>
+        <v-spacer />
         <a :href="docs">
           <v-icon>help_outline</v-icon>
         </a>
       </v-app-bar>
       <v-content class="fill-height">
-        <router-view></router-view>
+        <router-view />
       </v-content>
     </div>
 <!--    Error state -->
@@ -26,7 +26,7 @@
     </v-layout>
 <!--    Loading state -->
     <v-layout v-else align-center justify-center column>
-      <v-progress-circular indeterminate></v-progress-circular>
+      <v-progress-circular indeterminate />
       <p class="caption">Beep boop, I'm a loading screen</p>
     </v-layout>
   </v-app>
