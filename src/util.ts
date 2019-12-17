@@ -2,6 +2,7 @@ import {apolloClient} from '@/plugins/apollo';
 import gql from 'graphql-tag';
 import * as Sentry from '@sentry/browser';
 import {Severity} from '@sentry/browser';
+import store from './store';
 
 export function debounce(func: (...args: any[]) => any, wait: number) {
   let timeout: NodeJS.Timer;
@@ -32,6 +33,8 @@ export async function checkAuthentication(): Promise<boolean> {
           }
       }`
     });
+    // Initialise if we haven't already
+    if (!store.state.auth.loggedIn) await store.dispatch('auth/initialiseUser');
     return true;
   } catch (e) {
     const code = getApolloErrorCode(e);
@@ -48,4 +51,16 @@ export async function checkAuthentication(): Promise<boolean> {
       throw new Error('An unknown error occurred while checking authentication state' + e);
     }
   }
+}
+
+export function copy(text: string) {
+  const tmp = document.createElement('input');
+  tmp.style.position = 'absolute';
+  tmp.style.left = '-1000px';
+  tmp.style.top = '-1000px';
+  tmp.value = text;
+  document.body.appendChild(tmp);
+  tmp.select();
+  document.execCommand('copy');
+  document.body.removeChild(tmp);
 }

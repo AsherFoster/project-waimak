@@ -12,58 +12,44 @@
       <v-divider />
       <v-layout mt-4>
         <v-flex xs12 sm6 md3 v-for="workspace in workspaces.nodes" :key="workspace.id">
-          <v-card>
+          <v-card :to="'/workspaces/' + workspace.id">
             <v-card-title>
               {{workspace.name}}
             </v-card-title>
+            <v-card-subtitle>
+              {{workspace.modules.totalCount}} modules
+            </v-card-subtitle>
           </v-card>
         </v-flex>
       </v-layout>
     </div>
-    <v-layout row wrap v-if="bots && bots.nodes.length">
-      <v-flex xs12 md6 pa-2 v-for="bot in bots.nodes" :key="bot.id">
-        <v-card>
-          <router-link :to="'/bots/' + bot.id">
-            <v-card-title primary-title>
-              <v-avatar size="38" class="avatar" slot="activator">
-                <img :src="bot.avatarUrl">
-              </v-avatar>
-              <span class="title ml-2">{{bot.name}}</span>
-              <StatusIcon :connection="bot.connection"></StatusIcon>
+    <div>
+      <v-layout row ma-2 mt-6>
+        <h2 class="headline">Bots</h2>
+        <v-flex />
+        <v-btn text to="/bots/link">
+          Create New
+          <v-icon right>add</v-icon>
+        </v-btn>
+      </v-layout>
+      <v-divider />
+      <v-layout row wrap v-if="bots && bots.nodes.length">
+        <v-flex v-for="bot in bots.nodes" :key="bot.id" class="ma-4" style="max-width: 230px">
+          <v-card :to="'/bots/' + bot.id">
+            <v-img aspect-ratio="1" :src="bot.avatarUrl" />
+            <v-card-title>
+              {{bot.name}}
             </v-card-title>
-          </router-link>
-          <v-layout>
-            <v-flex xs8 ma-4>
-              <div>
-                <v-sparkline
-                        :value="sparkline"
-                        color="#9c27b0"
-                        :line-width="3"
-                        :smooth="5"
-                        auto-draw
-                ></v-sparkline>
-              </div>
-            </v-flex>
-            <v-flex xs4 ma-4 style="text-align: right">
-              <v-layout wrap>
-                <v-flex sm6>
-                  <p class="display-2">{{bot.scripts.totalCount}}</p>
-                  <p class="caption">Scripts running</p>
-                </v-flex>
-                <v-flex sm6>
-                  <p class="display-2">32</p>
-                  <p class="caption">Guilds</p>
-                </v-flex>
-              </v-layout>
-            </v-flex>
-          </v-layout>
-        </v-card>
-      </v-flex>
-    </v-layout>
-    <v-layout v-else-if="bots && bots.nodes" align-center class="my-6" column>
-      <p>You don't have any bots yet!</p>
-      <v-btn to="/bots/link">Make one!</v-btn>
-    </v-layout>
+            <v-card-subtitle>
+              {{bot.modules.totalCount}} modules
+            </v-card-subtitle>
+          </v-card>
+        </v-flex>
+      </v-layout>
+      <div v-else-if="bots && bots.nodes" class="my-6 mx-2">
+        <p>You don't have any bots yet!</p>
+      </div>
+    </div>
   </div>
 </template>
 

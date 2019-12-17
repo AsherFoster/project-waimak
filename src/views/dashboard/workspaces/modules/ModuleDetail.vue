@@ -76,7 +76,6 @@
   import {Component, Vue, Watch} from 'vue-property-decorator';
   import gql from 'graphql-tag';
   import {debounce} from '@/util';
-  import SelectBotForDeployment from '@/components/SelectBotForDeployment.vue';
   import AceEditor from '@/components/AceEditor.vue';
   import WithTooltip from '@/components/WithTooltip.vue';
 
@@ -87,11 +86,11 @@
   }
 
   @Component({
-    components: {WithTooltip, SelectBotForDeployment, AceEditor},
+    components: {WithTooltip, AceEditor},
     apollo: {
-      script() {
+      module() {
         return {
-          query: gql`query GetScriptDetails($id: String!) {
+          query: gql`query GetModuleDetails($id: String!) {
   module(id: $id) {
     id
     name
@@ -101,14 +100,14 @@
           variables: {
             id: this.$route.params.id
           },
-          result(res: {data: {script: Module}}) {
-            this.scriptName = res.data.script.name;
+          result(res: {data: {module: Module}}) {
+            this.moduleName = res.data.module.name;
           }
         };
       }
     }
   })
-  export default class ScriptDetail extends Vue {
+  export default class ModuleDetail extends Vue {
     public module: Module | null = null;
     public bodyDirty: boolean = false; // If the code has been modified, and should be savable
     public saving: boolean = false;
@@ -117,8 +116,8 @@
     public nameError: string = '';
 
     public debouncedTitleChange = debounce(() => this.saveTitle(), 500);
-    @Watch('scriptName')
-    public onScriptNameChange() {
+    @Watch('moduleName')
+    public onModuleNameChange() {
       this.debouncedTitleChange();
     }
 
@@ -151,7 +150,7 @@
         else error = 'Internal Error occurred';
       }
       if (newScript) {
-        this.module.name = newScript.data.updateScript.name;
+        this.module.name = newScript.data.updateModule.name;
         this.moduleName = this.module.name; // Just in case the server modifies it
       }
       this.nameError = error;
@@ -177,14 +176,14 @@
       if (!this.module) return;
       this.saving = true;
       await this.$apollo.mutate({
-        mutation: gql`mutation UpdateScript($module: ModuleUpdateInput!) {
+        mutation: gql`mutation UpdateModule($module: ModuleUpdateInput!) {
 updateModule(module: $module) {
   id
   body
 }
 }`,
         variables: {
-          script: {
+          module: {
             id: (this.module as Module).id,
             body: (this.module as Module).body // Cast it, if it's saving, it must exist
           }
@@ -202,7 +201,7 @@ updateModule(module: $module) {
         variables: {
           id: (this.module as Module).id
         },
-        refetchQueries: ['ListScripts']
+        refetchQueries: ['ListModules']
       });
 
       this.$router.push('/workspace/' + this.$route.params.workspace);

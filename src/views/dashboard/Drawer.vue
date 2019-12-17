@@ -124,14 +124,9 @@
         path: '/'
       },
       {
-        icon: 'android',
-        name: 'Bots',
-        path: '/bots'
-      },
-      {
         icon: 'description',
-        name: 'Scripts',
-        path: '/scripts'
+        name: 'Modules',
+        path: '/workspaces'
       }
     ];
     @Watch('mini')

@@ -109,6 +109,7 @@ input BotCreateInput {
 input BotUpdateInput {
     id: String!
     runtime: Runtime
+    token: String
 }
 
 type BotAccess {

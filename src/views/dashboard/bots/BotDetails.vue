@@ -1,59 +1,87 @@
 <template>
-  <v-card v-if="bot">
-    <v-layout align-center pa-3>
-      <v-avatar size="100">
-        <img :src="bot.avatarUrl">
+  <div v-if="bot">
+    <v-toolbar>
+      <v-avatar class="mr-4">
+        <img :src="bot.avatarUrl" />
       </v-avatar>
-      <h2 class="ml-3">
-        <span class="display-1">{{bot.name}}</span>
-      </h2>
-      <StatusIcon :connection="bot.connection"></StatusIcon>
-      <v-spacer></v-spacer>
-      <v-menu offset-y>
+      <v-toolbar-title>{{bot.name}}</v-toolbar-title>
+      <span v-if="selected.length">{{selected.length}} script{{selected.length > 1 ? 's' : ''}} selected</span>
+      <v-flex />
+      <v-btn icon :disabled="!selected.length" @click="removeSelected">
+        <v-icon>link_off</v-icon>
+      </v-btn>
+      <v-menu>
         <template v-slot:activator="{ on }">
-          <v-btn icon color="error" v-on="on">
-            <v-icon>delete</v-icon>
+          <v-btn icon v-on="on">
+            <v-icon>more_vert</v-icon>
           </v-btn>
         </template>
         <v-card>
           <v-list>
-            <v-list-item @click="">
-              <v-list-item-icon>
-                <v-icon>cancel</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Cancel</v-list-item-title>
+            <v-list-item @click="refreshList">
+              <v-list-item-action>
+                <v-icon>refresh</v-icon>
+              </v-list-item-action>
+              <v-list-item-title>
+                Reload List
+              </v-list-item-title>
             </v-list-item>
-            <v-list-item @click="deleteBot">
-              <v-list-item-icon>
-                <v-icon>delete</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>Confirm</v-list-item-title>
+            <v-list-item @click="() => copy(inviteLink)">
+              <v-list-item-action>
+                <v-icon>copy</v-icon>
+              </v-list-item-action>
+              <v-list-item-title>
+                Copy Invite Link
+              </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-card>
       </v-menu>
-    </v-layout>
-    <v-card-text>
-      <p>Platform: {{bot.platform}}</p>
-      <p>Created: {{bot.created | cMomentNow}}</p>
-      <v-layout align-center>
-        <v-text-field
-                style="max-width: 400px;"
-                :value="bot.apiKey"
-                readonly
-                label="API Key"
-                :append-icon="keyShown ? 'visibility_off' : 'visibility'"
-                :type="keyShown ? 'text' : 'password'"
-                @click:append="keyShown = !keyShown"
-        ></v-text-field>
-        <CopyText :value="bot.apiKey" />
-      </v-layout>
-      <v-layout align-center>
-        <v-text-field style="max-width: 400px;" :value="inviteLink" readonly label="Invite Link"></v-text-field>
-        <CopyText :value="inviteLink" />
-      </v-layout>
-    </v-card-text>
-  </v-card>
+    </v-toolbar>
+    <v-data-table
+            :headers="tableHeaders"
+            :items="bot.modules.nodes"
+            show-select
+            v-model="selected"
+            hide-default-footer
+            item-key="script.id"
+    >
+      <template v-slot:item.started="{ item }">
+        {{item.created | cMomentNow}}
+      </template>
+      <template v-slot:item.state="{ item }">
+        {{item.state | cScriptState}}
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-layout justify-end>
+          <v-menu>
+            <template v-slot:activator="{ on }">
+              <v-btn icon v-on="on">
+                <v-icon>more_vert</v-icon>
+              </v-btn>
+            </template>
+            <v-card>
+              <v-list>
+                <v-list-item @click="removeModule(item.module.id)">
+                  <v-list-item-action>
+                    <v-icon>link_off</v-icon>
+                  </v-list-item-action>
+                  <v-list-item-title>Stop</v-list-item-title>
+                </v-list-item>
+                <v-list-item :to="'/modules/' + item.script.id">
+                  <v-list-item-action>
+                    <v-icon>info</v-icon>
+                  </v-list-item-action>
+                  <v-list-item-title>Details</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-menu>
+        </v-layout>
+      </template>
+      <template v-slot:no-data>No modules linked</template>
+    </v-data-table>
+  </div>
 </template>
 
 <script lang="ts">
@@ -61,18 +89,22 @@
   import gql from 'graphql-tag';
   import StatusIcon from '@/components/StatusIcon.vue';
   import CopyText from '@/components/CopyText.vue';
+  import {copy} from '@/util';
 
   interface BotQueryResult {
     id: string;
     name: string;
-    apiKey: string;
     avatarUrl?: string;
-    platform: string;
     created: Date;
-    connection?: {
-      state: string;
-      created: Date;
+    modules: ModuleLink[];
+  }
+  interface ModuleLink {
+    module: {
+      id: string;
+      name: string;
     };
+    created: Date;
+    state: string;
   }
 
   @Component({
@@ -84,13 +116,18 @@
   bot(id: $id) {
     id
     name
-    apiKey
     avatarUrl
-    platform
     created
-    connection {
-        state
+    modules {
+      totalCount
+      nodes {
+        module {
+          id
+          name
+        }
         created
+        state
+      }
     }
   }
 }`,
@@ -105,23 +142,61 @@
   })
   export default class BotDetails extends Vue {
     public bot: BotQueryResult | null = null;
-    public keyShown: boolean = false;
 
     public get inviteLink(): string {
       if (!this.bot) return '';
       return `https://discordapp.com/oauth2/authorize?client_id=${this.bot.id}&scope=bot`;
     }
-    public async deleteBot(): Promise<void> {
+    public readonly tableHeaders = [
+      {
+        text: 'Name',
+        value: 'script.name'
+      },
+      {
+        text: 'Added',
+        value: 'created'
+      },
+      {
+        text: 'State',
+        value: 'state'
+      },
+      {
+        text: '',
+        value: 'actions',
+        sortable: false,
+        align: 'end'
+      }
+    ];
+    public selected: ModuleLink[] = [];
+    public async refreshList(): Promise<void> {
+      await this.$apollo.queries.bot.refetch();
+    }
+
+    public async removeModule(id: string, reloadAfter: boolean = true): Promise<void> {
+      if (!this.bot) return;
+
       await this.$apollo.mutate({
-        mutation: gql`mutation DeleteBot($id: String!) {
-deleteBot(bot: $id)
-}`,
+        mutation: gql`
+mutation RemoveScriptFromBot($bot: String!, $module: String!) {
+  removeModuleFromBot(bot: $bot, module: $module)
+}
+        `,
         variables: {
-          id: this.bot && this.bot.id
+          bot: this.bot.id,
+          module: id
         }
       });
-      this.$router.push('/bots');
+      if (reloadAfter) this.refreshList();
     }
+
+    // public async restartSelected() {
+    //   return Promise.all(this.selected.map((s) => this.restartModule(s.module.id, false)));
+    // }
+    public async removeSelected() {
+      return Promise.all(this.selected.map((s) => this.removeModule(s.module.id), false));
+    }
+
+    public copy = (t: string) => copy(t);
   }
 </script>
 

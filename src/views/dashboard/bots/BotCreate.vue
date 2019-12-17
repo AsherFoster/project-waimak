@@ -4,28 +4,21 @@
       <!-- Simple Details -->
       <v-expansion-panel>
         <v-expansion-panel-header :hide-actions="step <= 0">
-          Details
+          Link your bot
           <v-icon slot="actions" color="teal">check</v-icon>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-card flat>
             <v-card-text>
               <v-form v-model="formDetailsValid">
-                <v-layout align-center justify-center>
-                  <v-flex class="ma-3" sm5>
-                    <v-text-field v-model="token" :rules="[required, tokenValidator]" label="Token"></v-text-field>
-                    <v-select
-                            v-model="platform"
-                            :items="platforms"
-                            item-text="name"
-                            item-value="id"
-                    ></v-select>
-                  </v-flex>
+                <v-layout align-center justify-center column>
+                  <v-text-field v-model="token" :rules="[required, tokenValidator]" label="Token" />
+                  <p class="caption">We use this to connect to Discord on behalf of your bot</p>
                 </v-layout>
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-flex></v-flex>
+              <v-flex />
               <v-btn @click="createBot" :loading="loading" :disabled="!formDetailsValid">Next</v-btn>
             </v-card-actions>
           </v-card>
@@ -53,16 +46,10 @@
                   <p class="caption mb-0">ID: {{bot.discordId}}</p>
                 </v-flex>
               </v-layout>
-              <v-divider class="my-4"></v-divider>
+              <v-divider class="my-4" />
               <h3 class="title">What next?</h3>
               <p>Check out the <a>docs</a> for more info, or dive right in and <router-link :to="'/bots/' + bot.id">configure it</router-link>,
-                or head to <router-link to="/scripts">scripts</router-link> and get started writing your first script!</p>
-              <h3 class="title">Your bot's API key</h3>
-              <p class="mb-0">You'll need this to connect your client to Canal</p>
-              <div>
-                <code>{{bot.apiKey}}</code>
-                <CopyText :value="bot.apiKey"></CopyText>
-              </div>
+                or head to <router-link to="/workspaces">modules</router-link> and get started writing your first module!</p>
             </v-card-text>
             <v-card-actions>
               <v-flex></v-flex>
@@ -81,22 +68,16 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import {Platform} from '@/graphql/schema-types';
   import gql from 'graphql-tag';
   import CopyText from '@/components/CopyText.vue';
   import {DOCS_URL} from '@/constants';
 
-  interface PlatformMap {
-    name: string;
-    id: Platform;
-  }
   interface Bot {
     id: string;
     name: string;
-    discriminator: string;
     avatarUrl: string;
+    discordDiscriminator: string;
     discordId: string;
-    apiKey: string;
   }
 
   @Component({
@@ -108,9 +89,7 @@
     public loading: boolean = false;
 
     public token: string = '';
-    public platform: Platform = 'NODEJS';
     public formDetailsValid: boolean = false;
-    public readonly platforms: PlatformMap[] = [{name: 'Node.js', id: 'NODEJS'}];
 
     public bot: Bot | null = null;
 
@@ -122,15 +101,16 @@
   createBot(bot: $bot) {
     id
     name
-    discriminator
     avatarUrl
-    discordId
-    apiKey
+    ... on DiscordBot {
+        discordDiscriminator
+        discordId
+    }
   }
 }`,
         variables: {
           bot: {
-            platform: this.platform,
+            runtime: this.runtime,
             token: this.token,
           }
         },
@@ -151,10 +131,6 @@
         if (val.split('.').length > 3 || val.length > 59) return 'Token is too long';
         return true;
       } else return 'Token is required';
-    }
-    public deviceCodeValidator(val: string): true|string {
-      if (val && val.length === 8 && val.match(/^[a-zA-Z0-9]{8}$/)) return true;
-      else return 'That code doesn\'t quite look right';
     }
   }
 </script>
