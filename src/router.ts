@@ -4,8 +4,6 @@ import * as Sentry from '@sentry/browser';
 import Dashboard from './views/dashboard/Dashboard.vue';
 import {checkAuthentication} from '@/util';
 import store from './store';
-import {apolloClient} from '@/plugins/apollo';
-import gql from 'graphql-tag';
 
 Vue.use(Router);
 
@@ -46,14 +44,19 @@ const router = new Router({
           path: 'workspaces',
           redirect() {
             if (!store.state.auth.user || !store.state.auth.user.id) {
-              console.error('Grrr, a guard didn\'t work properly or something', store.state.auth.user);
-              return '/error';
+              return '/error?error=err-workspaces-redirect-failed';
             }
             return 'workspaces/' + store.state.auth.user.id + '/modules';
           }
         },
-        {path: 'workspaces/:workspace/modules', component: () => import('./views/dashboard/workspaces/modules/ModuleIndex.vue')},
-        {path: 'workspaces/:workspace/modules/:id', component: () => import('./views/dashboard/workspaces/modules/ModuleDetail.vue')},
+        {
+          path: 'workspaces/:workspace/modules',
+          component: () => import('./views/dashboard/workspaces/modules/ModuleIndex.vue')
+        },
+        {
+          path: 'workspaces/:workspace/modules/:id',
+          component: () => import('./views/dashboard/workspaces/modules/ModuleDetail.vue')
+        },
         {path: 'workspaces/:workspace', redirect: (to) => 'workspaces/' + to.params.workspace + '/modules'},
         {path: 'settings', component: () => import('./views/dashboard/settings/SettingsView.vue')},
         {path: 'settings/deleteaccount', component: () => import('./views/dashboard/settings/DeleteAccount.vue')},
@@ -94,7 +97,7 @@ const router = new Router({
 
 router.onError((e: Error) => {
   Sentry.captureException(e);
-  router.push('/error');
+  router.push('/error?error=unknown-router-error');
 });
 
 export default router;

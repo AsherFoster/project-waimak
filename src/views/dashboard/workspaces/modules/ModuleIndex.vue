@@ -25,14 +25,14 @@
       <v-btn icon @click="reloadList">
         <v-icon>refresh</v-icon>
       </v-btn>
-      <v-btn icon>
+      <v-btn icon @click="workspaceSettingsOpen = true">
         <v-icon>settings</v-icon>
       </v-btn>
       <v-progress-linear absolute bottom indeterminate :active="$apollo.loading" />
     </v-toolbar>
     <v-list v-if="workspace && workspace.modules.nodes.length">
 <!--      We need to use @click rather than :to here in order to support stopPropagation on the action (I think) -->
-      <v-list-item v-for="module in workspace.modules.nodes" two-line @click="$router.push('./modules/' + module.id)">
+      <v-list-item v-for="module in workspace.modules.nodes" two-line @click="$router.push('./modules/' + module.id)" :key="module.id">
         <v-list-item-content>
           <v-list-item-title>
             {{module.name}}
@@ -72,8 +72,13 @@
         </v-list-item-action>
       </v-list-item>
     </v-list>
-    <h2 class="ma-4" v-else-if="workspace && !workspace.modules.nodes.length">No modules found</h2>
-    <h2 class="ma-4" v-else-if="!workspace && !$apollo.loading">Workspace not found</h2>
+    <v-layout class="ma-4" v-else-if="workspace && !workspace.modules.nodes.length" align-center column>
+      <h2 class="headline">No modules found</h2>
+      <v-btn @click="createModule" text>Create one</v-btn>
+    </v-layout>
+    <v-layout class="ma-4" v-else-if="!workspace && !$apollo.loading" justify-center>
+      <h2 class="headline">Workspace not found</h2>
+    </v-layout>
     <v-tooltip left>
       <template #activator="{ on }">
         <v-btn fab @click="createModule" fixed bottom right color="accent" v-on="on">
@@ -82,12 +87,14 @@
       </template>
       <span>Create Module</span>
     </v-tooltip>
+    <WorkspaceSettings v-model="workspaceSettingsOpen" :workspace-id="workspace.id" v-if="workspace" />
   </div>
 </template>
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
   import gql from 'graphql-tag';
+  import WorkspaceSettings from '@/components/WorkspaceSettings.vue';
 
   interface Module {
     id: string;
@@ -101,17 +108,18 @@
     modules: {
       totalCount: number;
       nodes: Module[];
-    }
+    };
   }
 
   interface Workspaces {
     nodes: {
       id: string;
       name: string;
-    }
+    };
   }
 
   @Component({
+    components: {WorkspaceSettings},
     apollo: {
       workspace: {
         query: gql`query GetModulesInWorkspace($workspace: String!) {
@@ -148,11 +156,13 @@
   export default class ModuleIndex extends Vue {
     public workspace: Workspace | null = null;
     public workspaces: Workspaces | null = null;
+    public workspaceSettingsOpen: boolean = false;
     public workspaceSelectChange(v: string) {
       this.$router.push({params: {workspace: v}});
     }
 
     public async createModule() {
+      if (!this.workspace) return;
       const resp = await this.$apollo.mutate({
         mutation: gql`mutation CreateModuleInWorkspace($module: ModuleCreateInput!) {
   createModule(module: $module) {
@@ -162,10 +172,25 @@
         variables: {
           module: {
             runtime: 'JAVASCRIPT',
-            workspace: this.$route.params.workspace
+            workspace: this.workspace.id
           }
         },
-        refetchQueries: ['GetModulesInWorkspace']
+        refetchQueries: [{
+          query: gql`query UpdateCacheWithNewModule($id: String!) {
+  workspace(id: $id) {
+    id
+    modules {
+      nodes {
+        id
+        name
+      }
+    }
+  }
+}`,
+          variables: {
+            id: this.workspace.id
+          }
+        }]
       });
 
       this.$router.push('./modules/' + resp.data.createModule.id);
@@ -178,13 +203,12 @@
         variables: {
           id: module.id
         },
-        refetchQueries: ['ListWorkspacesForSelect']
-      })
+        refetchQueries: ['GetModulesInWorkspace']
+      });
     }
     public reloadList() {
       this.$apollo.queries.workspace.refetch();
     }
-    public thing = () => console.log('beep boop');
   }
 </script>
 

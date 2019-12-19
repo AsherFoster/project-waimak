@@ -5,7 +5,7 @@
         <img :src="bot.avatarUrl" />
       </v-avatar>
       <v-toolbar-title>{{bot.name}}</v-toolbar-title>
-      <span v-if="selected.length">{{selected.length}} script{{selected.length > 1 ? 's' : ''}} selected</span>
+<!--      <span v-if="selected.length">{{selected.length}} script{{selected.length > 1 ? 's' : ''}} selected</span>-->
       <v-flex />
       <v-btn icon :disabled="!selected.length" @click="removeSelected">
         <v-icon>link_off</v-icon>
@@ -28,7 +28,7 @@
             </v-list-item>
             <v-list-item @click="() => copy(inviteLink)">
               <v-list-item-action>
-                <v-icon>copy</v-icon>
+                <v-icon>file_copy</v-icon>
               </v-list-item-action>
               <v-list-item-title>
                 Copy Invite Link
@@ -44,9 +44,9 @@
             show-select
             v-model="selected"
             hide-default-footer
-            item-key="script.id"
+            item-key="module.id"
     >
-      <template v-slot:item.started="{ item }">
+      <template v-slot:item.created="{ item }">
         {{item.created | cMomentNow}}
       </template>
       <template v-slot:item.state="{ item }">
@@ -68,7 +68,7 @@
                   </v-list-item-action>
                   <v-list-item-title>Stop</v-list-item-title>
                 </v-list-item>
-                <v-list-item :to="'/modules/' + item.script.id">
+                <v-list-item :to="'/workspaces/' + item.module.workspace.id + '/modules/' + item.module.id">
                   <v-list-item-action>
                     <v-icon>info</v-icon>
                   </v-list-item-action>
@@ -81,15 +81,25 @@
       </template>
       <template v-slot:no-data>No modules linked</template>
     </v-data-table>
+    <v-tooltip left>
+      <template #activator="{ on }">
+        <v-btn fab color="accent" fixed bottom right v-on="on" @click="attaching = true">
+          <v-icon>link</v-icon>
+        </v-btn>
+      </template>
+      <span>Attach new Module</span>
+    </v-tooltip>
+    <SelectModuleToAttach v-model="attaching" :bot="bot.id" />
   </div>
 </template>
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
   import gql from 'graphql-tag';
-  import StatusIcon from '@/components/StatusIcon.vue';
   import CopyText from '@/components/CopyText.vue';
   import {copy} from '@/util';
+  import WithTooltip from '@/components/WithTooltip.vue';
+  import SelectModuleToAttach from '@/components/SelectModuleToAttach.vue';
 
   interface BotQueryResult {
     id: string;
@@ -102,17 +112,19 @@
     module: {
       id: string;
       name: string;
+      workspace: {
+        id: string;
+      };
     };
     created: Date;
     state: string;
   }
 
   @Component({
-    components: {CopyText, StatusIcon},
+    components: {SelectModuleToAttach, WithTooltip, CopyText},
     apollo: {
-      bot() {
-        return {
-          query: gql`query GetBotDetails($id: String!) {
+      bot: {
+        query: gql`query GetBotDetails($id: String!) {
   bot(id: $id) {
     id
     name
@@ -122,6 +134,9 @@
       totalCount
       nodes {
         module {
+          workspace {
+            id
+          }
           id
           name
         }
@@ -131,17 +146,17 @@
     }
   }
 }`,
-          variables() {
-            return {
-              id: this.$route.params.id
-            };
-          }
-        };
+        variables() {
+          return {
+            id: this.$route.params.id
+          };
+        }
       }
     }
   })
   export default class BotDetails extends Vue {
     public bot: BotQueryResult | null = null;
+    public attaching: boolean = false;
 
     public get inviteLink(): string {
       if (!this.bot) return '';
@@ -150,7 +165,7 @@
     public readonly tableHeaders = [
       {
         text: 'Name',
-        value: 'script.name'
+        value: 'module.name'
       },
       {
         text: 'Added',
@@ -174,7 +189,6 @@
 
     public async removeModule(id: string, reloadAfter: boolean = true): Promise<void> {
       if (!this.bot) return;
-
       await this.$apollo.mutate({
         mutation: gql`
 mutation RemoveScriptFromBot($bot: String!, $module: String!) {

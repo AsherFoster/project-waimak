@@ -3,10 +3,10 @@ declare module '*.vue' {
   export default Vue;
 }
 
-declare module '*.graphql' {
-  const value: string;
-  export default value;
-}
+// declare module '*.graphql' {
+//   const value: string;
+//   export default value;
+// }
 
 // declare module 'vuetify/lib' {
 //   const Vuetify: any;

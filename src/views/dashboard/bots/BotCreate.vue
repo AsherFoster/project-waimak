@@ -71,6 +71,7 @@
   import gql from 'graphql-tag';
   import CopyText from '@/components/CopyText.vue';
   import {DOCS_URL} from '@/constants';
+  import {apolloClient} from '@/plugins/apollo';
 
   interface Bot {
     id: string;
@@ -110,13 +111,24 @@
 }`,
         variables: {
           bot: {
-            runtime: this.runtime,
             token: this.token,
           }
         },
-        refetchQueries: ['ListBots']
+        refetchQueries: [{
+          query: gql`query UpdateCacheWithNewBot {
+  bots {
+    nodes {
+      id
+      name
+      avatarUrl
+    }
+  }
+}`
+        }]
       });
       this.bot = resp.data.createBot;
+
+      // TODO update cache with new bot
       this.loading = false;
       this.step++;
     }

@@ -28,7 +28,6 @@
   import {Component, Vue} from 'vue-property-decorator';
   import gql from 'graphql-tag';
 
-
   interface Workspace {
     id: string;
     name: string;

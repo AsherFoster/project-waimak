@@ -161,6 +161,8 @@ type Module {
     createdBy: User
     updated: Date
     updatedBy: User
+    link(bot: String!): ModuleLink
+    links: [ModuleLinks]!
 }
 type Modules {
     totalCount: Int!

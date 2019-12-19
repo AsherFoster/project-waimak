@@ -1,18 +1,18 @@
 <template>
   <div class="fill-height pa-6">
-    <div v-if="workspaces && workspaces.nodes">
+    <div>
       <v-layout row ma-2>
         <h2 class="headline">Workspaces</h2>
         <v-flex />
-        <v-btn text>
+        <v-btn text @click="creatingWorkspace = true">
           Create New
           <v-icon right>add</v-icon>
         </v-btn>
       </v-layout>
       <v-divider />
-      <v-layout mt-4>
+      <v-layout row wrap mt-4 v-if="workspaces && workspaces.nodes.length">
         <v-flex xs12 sm6 md3 v-for="workspace in workspaces.nodes" :key="workspace.id">
-          <v-card :to="'/workspaces/' + workspace.id">
+          <v-card :to="'/workspaces/' + workspace.id" class="ma-4">
             <v-card-title>
               {{workspace.name}}
             </v-card-title>
@@ -22,6 +22,7 @@
           </v-card>
         </v-flex>
       </v-layout>
+      <h2 v-else>You have no workspaces. Uh oh.</h2>
     </div>
     <div>
       <v-layout row ma-2 mt-6>
@@ -34,8 +35,8 @@
       </v-layout>
       <v-divider />
       <v-layout row wrap v-if="bots && bots.nodes.length">
-        <v-flex v-for="bot in bots.nodes" :key="bot.id" class="ma-4" style="max-width: 230px">
-          <v-card :to="'/bots/' + bot.id">
+        <v-flex v-for="bot in bots.nodes" :key="bot.id" style="max-width: 280px">
+          <v-card :to="'/bots/' + bot.id" class="ma-4" >
             <v-img aspect-ratio="1" :src="bot.avatarUrl" />
             <v-card-title>
               {{bot.name}}
@@ -50,6 +51,7 @@
         <p>You don't have any bots yet!</p>
       </div>
     </div>
+    <CreateWorkspacePopup v-model="creatingWorkspace" />
   </div>
 </template>
 
@@ -57,7 +59,7 @@
   import { Component, Vue } from 'vue-property-decorator';
   import {namespace} from 'vuex-class';
   import gql from 'graphql-tag';
-  import StatusIcon from '@/components/StatusIcon.vue';
+  import CreateWorkspacePopup from '@/components/CreateWorkspacePopup.vue';
 
   const auth = namespace('auth');
 
@@ -85,7 +87,7 @@
 
   @Component({
     components: {
-      StatusIcon
+      CreateWorkspacePopup
     },
     apollo: {
       bots: gql`query GetBotsForDashboard {
@@ -116,6 +118,7 @@
   export default class Home extends Vue {
     public bots: BotQueryResult | null = null;
     public workspaces: WorkspaceQueryResult | null = null;
+    public creatingWorkspace: boolean = false;
 
     public sparkline = Array.from({length: 24}, this.sparklineValue);
 

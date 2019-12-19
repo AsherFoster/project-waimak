@@ -13,7 +13,7 @@
   })
   export default class CopyText extends Vue {
     public copy() {
-      copy(this.$props.value)
+      copy(this.$props.value);
     }
   }
 </script>

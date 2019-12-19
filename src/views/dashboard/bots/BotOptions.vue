@@ -4,6 +4,16 @@
     <p>These options could potentially break your bot, proceed with caution.</p>
     <div v-if="bot">
       <v-divider />
+      <v-subheader>Sharing <v-chip small>WIP</v-chip></v-subheader>
+      <v-container>
+        <v-list>
+          <v-list-item>
+            You (owner)
+          </v-list-item>
+        </v-list>
+      </v-container>
+
+      <v-divider />
       <v-subheader>Token</v-subheader>
       <v-layout align-center>
         <v-text-field
@@ -70,7 +80,7 @@ bot(id: $bot) {
         variables() {
           return {
             bot: this.$route.params.id
-          }
+          };
         },
         result(this: BotOptions, d: any) {
           this.tokenValue = d.data.bot.token;
@@ -85,6 +95,11 @@ bot(id: $bot) {
     public editingToken: boolean = false;
     public savingToken: boolean = false;
     public tokenSaveError: string = '';
+
+    public deleteConfirmValue: string = '';
+    public deleteConfirmOpen: boolean = false;
+    public deleting: boolean = false;
+
     public async saveToken(): Promise<void> {
       if (!this.bot) return;
       if (this.tokenValue === this.bot.token) {
@@ -114,16 +129,12 @@ bot(id: $bot) {
           }
         });
         this.editingToken = false;
+        this.tokenSaveError = '';
       } catch (e) {
         this.tokenSaveError = 'Unable to save token. Are you sure it\'s correct?';
       }
       this.savingToken = false;
     }
-
-    public deleteConfirmValue: string = '';
-    public deleteConfirmOpen: boolean = false;
-    public deleting: boolean = false;
-
     public async deleteBot(): Promise<void> {
       this.deleting = true;
       await this.$apollo.mutate({
@@ -132,7 +143,17 @@ deleteBot(bot: $id)
 }`,
         variables: {
           id: this.$route.params.id
-        }
+        },
+        refetchQueries: [{
+          query: gql`query UpdateBotsAfterDelete {
+  bots {
+    nodes {
+      id
+      name
+    }
+  }
+}`
+        }]
       });
       this.deleting = this.deleteConfirmOpen = false;
       this.$router.push('/');

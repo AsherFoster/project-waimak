@@ -26,7 +26,7 @@
       </v-select>
       <v-skeleton-loader v-else type="list-item-avatar" />
       <v-list shaped>
-        <v-list-item to="./">
+        <v-list-item to="info">
           <v-list-item-title>
             Overview
           </v-list-item-title>
@@ -34,6 +34,12 @@
         <v-list-item disabled>
           <v-list-item-title>
             K/V Store
+          </v-list-item-title>
+          <v-chip small class="flex-shrink-0">WIP</v-chip>
+        </v-list-item>
+        <v-list-item disabled>
+          <v-list-item-title>
+            Webhooks
           </v-list-item-title>
           <v-chip small class="flex-shrink-0">WIP</v-chip>
         </v-list-item>
@@ -52,9 +58,7 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
-  import StatusIcon from '@/components/StatusIcon.vue';
   import gql from 'graphql-tag';
-  import {ClientState} from '@/graphql/schema-types';
 
   interface BotsQuery {
     nodes: BotOverview[];
@@ -66,7 +70,6 @@
   }
 
   @Component({
-    components: {StatusIcon},
     apollo: {
       bots: gql`query GetBotsForList {
   bots {

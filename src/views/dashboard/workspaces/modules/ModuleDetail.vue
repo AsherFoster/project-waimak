@@ -7,7 +7,7 @@
       <v-flex shrink>
         <v-hover>
           <template slot-scope="{ hover }">
-            <v-layout>
+            <DebouncedInput :save-fn="saveTitle" :error.sync="nameError" :value="moduleName" :show-error="true">
               <v-text-field
                       :readonly="savingName"
                       v-model="moduleName"
@@ -16,17 +16,15 @@
                       :flat="!hover"
                       :error="!!nameError"
                       class="toolbar-title-input title"
-              ></v-text-field>
-              <WithTooltip v-if="nameError" :value="nameError" :css="'display: flex; align-content: center'">
-                <v-icon class="red--text">error</v-icon>
-              </WithTooltip>
-              <v-icon v-else-if="savingName" style="opacity: 0.3">sync</v-icon>
-              <v-icon v-else-if="hover" style="opacity: 0.3">check_circle</v-icon>
-            </v-layout>
+              />
+            </DebouncedInput>
           </template>
         </v-hover>
       </v-flex>
-      <v-flex></v-flex>
+      <v-flex />
+      <v-btn icon @click="deploying = true">
+        <v-icon>link</v-icon>
+      </v-btn>
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
           <WithTooltip value="Delete Module">
@@ -52,23 +50,24 @@
           </v-list>
         </v-card>
       </v-menu>
-      <WithTooltip value="Module Settings (WIP)">
-        <v-btn icon>
-          <v-icon>settings</v-icon>
-        </v-btn>
-      </WithTooltip>
+<!--      <WithTooltip value="Module Settings (WIP)">-->
+<!--        <v-btn icon>-->
+<!--          <v-icon>settings</v-icon>-->
+<!--        </v-btn>-->
+<!--      </WithTooltip>-->
     </v-toolbar>
     <AceEditor
             :value="module ? module.body : ''"
             @input="bodyChange"
             :disabled="saving || $apollo.loading || !module"
-    ></AceEditor>
+    />
     <v-banner :value="bodyDirty" single-line class="unsaved-banner">
       You have unsaved changes
       <template v-slot:actions>
         <v-btn :disabled="saving" @click="() => saveScript()">Save</v-btn>
       </template>
     </v-banner>
+    <SelectBotToLinkTo v-if="module" v-model="deploying" :module="module.id" />
   </v-layout>
 </template>
 
@@ -78,6 +77,8 @@
   import {debounce} from '@/util';
   import AceEditor from '@/components/AceEditor.vue';
   import WithTooltip from '@/components/WithTooltip.vue';
+  import SelectBotToLinkTo from '@/components/SelectBotToLinkTo.vue';
+  import DebouncedInput from '@/components/DebouncedInput.vue';
 
   interface Module {
     id: string;
@@ -86,9 +87,9 @@
   }
 
   @Component({
-    components: {WithTooltip, AceEditor},
+    components: {DebouncedInput, SelectBotToLinkTo, WithTooltip, AceEditor},
     apollo: {
-      module() {
+      module(this: ModuleDetail) {
         return {
           query: gql`query GetModuleDetails($id: String!) {
   module(id: $id) {
@@ -100,7 +101,7 @@
           variables: {
             id: this.$route.params.id
           },
-          result(res: {data: {module: Module}}) {
+          result: (res: {data: {module: Module}}) => {
             this.moduleName = res.data.module.name;
           }
         };
@@ -114,21 +115,14 @@
     public savingName: boolean = false;
     public moduleName: string = '';
     public nameError: string = '';
-
-    public debouncedTitleChange = debounce(() => this.saveTitle(), 500);
-    @Watch('moduleName')
-    public onModuleNameChange() {
-      this.debouncedTitleChange();
-    }
+    public deploying: boolean = false;
 
     public async saveTitle() {
       // Don't save if not loaded, if it's invalid, or it hasn't changed
-      if (!this.module || this.module.name === this.moduleName) return this.nameError = '';
-      if (!this.moduleName) return this.nameError = 'Name is required';
-      // this.nameError = '';
+      if (!this.module || this.module.name === this.moduleName) return;
+      if (!this.moduleName) throw new Error('Name is required');
       this.savingName = true;
       let newScript;
-      let error = '';
       try {
         newScript = await this.$apollo.mutate({
           mutation: gql`mutation UpdateModuleName($module: ModuleUpdateInput!) {
@@ -145,33 +139,17 @@
           }
         }) as any;
       } catch (e) {
-        if (e.message.includes('name already exists')) error = 'A module with that name already exists';
-        else if (e.message.includes('Invalid module name')) error = 'Name must be alphanumeric with dashes';
-        else error = 'Internal Error occurred';
+        if (e.message.includes('name already exists')) throw new Error('A module with that name already exists');
+        if (e.message.includes('Invalid module name')) throw new Error('Name must be alphanumeric with dashes');
+        throw new Error('An unknown occurred');
       }
       if (newScript) {
         this.module.name = newScript.data.updateModule.name;
         this.moduleName = this.module.name; // Just in case the server modifies it
       }
-      this.nameError = error;
       this.savingName = false;
     }
-    public deployToBot(id: string) {
-      if (!this.module) return;
-      this.$apollo.mutate({
-        mutation: gql`mutation LinkModuleToBot($module: String!, $bot: String!) {
-    linkModuleToBot(module: $module, bot: $bot) {
-      bot {
-        id
-      }
-    }
-  }`,
-        variables: {
-          module: this.module.id,
-          bot: id
-        }
-      });
-    }
+
     public async saveScript(): Promise<void> {
       if (!this.module) return;
       this.saving = true;
