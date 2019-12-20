@@ -3,8 +3,8 @@
     <h2>Please read the following</h2>
     <p>By deleting your Canal account, all related data for your account will be removed. This means</p>
     <ul>
-      <li>All your bots connected to Canal will stop functioning</li>
-      <li>Your scripts will be deleted permanently</li>
+      <li>All your bots powered Canal will stop functioning</li>
+      <li>Any modules you own, along with their scripts, will be deleted</li>
       <li>Any collaborators will lose access to resources you own</li>
     </ul>
     <v-checkbox v-model="accepted" label="I have read and understand the above"></v-checkbox>

@@ -1,17 +1,17 @@
 <template>
   <v-layout fill-height>
-    <v-navigation-drawer>
-      <v-list shaped>
-        <v-list-item to="/settings">
-          Home
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <div>
+<!--    <v-navigation-drawer>-->
+<!--      <v-list shaped>-->
+<!--        <v-list-item to="/settings">-->
+<!--          Home-->
+<!--        </v-list-item>-->
+<!--      </v-list>-->
+<!--    </v-navigation-drawer>-->
+    <v-container>
       <p>Hi, {{user.name}}</p>
       <p>Email: {{user.email}}</p>
       <v-btn color="error" text to="/settings/deleteaccount">Delete Account</v-btn>
-    </div>
+    </v-container>
   </v-layout>
 </template>
 
