@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 import {apolloClient} from '@/plugins/apollo';
 import {getApolloErrorCode} from '@/util';
 import {RootState} from './index';
+import {Severity} from '@sentry/browser';
 
 export interface User {
   id: string;

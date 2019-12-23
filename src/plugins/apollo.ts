@@ -6,7 +6,9 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import httpLink from '@/graphql/http-link';
 
 // Cache implementation
-const cache = new InMemoryCache();
+const cache = new InMemoryCache({
+  dataIdFromObject: (o) => o.id
+});
 
 // Create the apollo client
 export const apolloClient = new ApolloClient({

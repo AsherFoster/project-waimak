@@ -11,9 +11,15 @@
 
 <script lang="ts">
   import {Component, Vue} from 'vue-property-decorator';
+  import * as Sentry from '@sentry/browser';
 
   @Component({})
-  export default class Error extends Vue {
+  export default class ErrorPage extends Vue {
+    public created() {
+      if (this.$route.query.error) {
+        Sentry.captureException(new Error(`Error page invoked, reason: ${this.$route.query.error}`));
+      }
+    }
     public reload() {
       window.location.href = '/';
     }
