@@ -29,21 +29,35 @@ const router = new Router({
         {path: '', component: () => import('./views/dashboard/Home.vue')},
         {path: 'debug', component: () => import('./views/dashboard/Debug.vue')},
         {path: 'about', component: () => import('./views/dashboard/About.vue')},
-        {path: 'bots', component: () => import('./views/dashboard/bots/BotIndex.vue')},
+        {path: 'bots', redirect: '/'},
         {path: 'bots/link', component: () => import('./views/dashboard/bots/BotCreate.vue')},
         {
           path: 'bots/:id',
           component: () => import('./views/dashboard/bots/BotView.vue'),
           children: [
-            {path: '', redirect: 'details'},
-            {path: 'details', component: () => import('./views/dashboard/bots/BotDetails.vue')},
-            {path: 'scripts', component: () => import('./views/dashboard/bots/BotScripts.vue')},
-            {path: 'permissions', component: () => import('./views/dashboard/bots/BotPermissions.vue')},
+            {path: '', redirect: 'info'},
+            {path: 'info', component: () => import('./views/dashboard/bots/BotDetails.vue')},
             {path: 'options', component: () => import('./views/dashboard/bots/BotOptions.vue')}
           ]
         },
-        {path: 'scripts', component: () => import('./views/dashboard/scripts/ScriptIndex.vue')},
-        {path: 'scripts/:id', component: () => import('./views/dashboard/scripts/ScriptDetail.vue')},
+        {
+          path: 'workspaces',
+          redirect() {
+            if (!store.state.auth.user || !store.state.auth.user.id) {
+              return '/error?error=err-workspaces-redirect-failed';
+            }
+            return 'workspaces/' + store.state.auth.user.id + '/modules';
+          }
+        },
+        {
+          path: 'workspaces/:workspace/modules',
+          component: () => import('./views/dashboard/workspaces/modules/ModuleIndex.vue')
+        },
+        {
+          path: 'workspaces/:workspace/modules/:id',
+          component: () => import('./views/dashboard/workspaces/modules/ModuleDetail.vue')
+        },
+        {path: 'workspaces/:workspace', redirect: (to) => 'workspaces/' + to.params.workspace + '/modules'},
         {path: 'settings', component: () => import('./views/dashboard/settings/SettingsView.vue')},
         {path: 'settings/deleteaccount', component: () => import('./views/dashboard/settings/DeleteAccount.vue')},
         {
@@ -83,7 +97,7 @@ const router = new Router({
 
 router.onError((e: Error) => {
   Sentry.captureException(e);
-  router.push('/error');
+  router.push('/error?error=unknown-router-error');
 });
 
 export default router;
